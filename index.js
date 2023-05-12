@@ -11,7 +11,8 @@ const mongoose = require('mongoose');
 // const { Server }  = require("socket.io")
 const io = require('socket.io')(server, {
     cors: {
-        origin: 'http://localhost:8080',
+        // origin: 'http://localhost:8080',
+        origin: 'https://my.churchplus.co',
         methods: ['GET', 'POST'],
     },
 });

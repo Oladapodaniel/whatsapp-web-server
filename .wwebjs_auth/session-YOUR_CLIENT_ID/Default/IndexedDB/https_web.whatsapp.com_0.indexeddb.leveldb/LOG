@@ -1,0 +1,33 @@
+2023/05/09-18:37:00.117 d567 Reusing MANIFEST /Users/apple/Documents/whatsapp-web-server/.wwebjs_auth/session-YOUR_CLIENT_ID/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2023/05/09-18:37:00.118 d567 Recovering log #262
+2023/05/09-18:37:00.120 d567 Reusing old log /Users/apple/Documents/whatsapp-web-server/.wwebjs_auth/session-YOUR_CLIENT_ID/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000262.log 
+2023/05/09-18:37:00.120 d567 Delete type=2 #261
+2023/05/09-18:37:00.935 1fa2f Level-0 table #267: started
+2023/05/09-18:37:00.976 1fa2f Level-0 table #267: 12335 bytes OK
+2023/05/09-18:37:01.009 1fa2f Delete type=0 #262
+2023/05/09-18:37:01.022 1fa2f Manual compaction at level-0 from '\x00T\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00U\x00\x00\x00' @ 0 : 0; will stop at '\x00T\x06 \x03\x00\x00\x00\x00\x00\x80V@\x00\x01\x0b\x00I\x00d\x00T\x00t\x00l\x009\x000\x00D\x00a\x00y\x00s' @ 153556 : 1
+2023/05/09-18:37:01.022 1fa2f Compacting 1@0 + 1@1 files
+2023/05/09-18:37:01.085 1fa2f Generated table #268@0: 12797 keys, 106285 bytes
+2023/05/09-18:37:01.085 1fa2f Compacted 1@0 + 1@1 files => 106285 bytes
+2023/05/09-18:37:01.113 1fa2f compacted to: files[ 0 1 1 0 0 0 0 ]
+2023/05/09-18:37:01.114 1fa2f Delete type=2 #267
+2023/05/09-18:37:01.131 1fa2f Manual compaction at level-0 from '\x00T\x06 \x03\x00\x00\x00\x00\x00\x80V@\x00\x01\x0b\x00I\x00d\x00T\x00t\x00l\x009\x000\x00D\x00a\x00y\x00s' @ 153556 : 1 .. '\x00U\x00\x00\x00' @ 0 : 0; will stop at (end)
+2023/05/09-23:25:18.833 2d013 Compacting 1@1 + 1@2 files
+2023/05/09-23:25:18.852 2d013 Generated table #269@1: 56 keys, 1047 bytes
+2023/05/09-23:25:18.853 2d013 Compacted 1@1 + 1@2 files => 1047 bytes
+2023/05/09-23:25:18.881 2d013 compacted to: files[ 0 0 1 0 0 0 0 ]
+2023/05/09-23:25:18.901 2d013 Delete type=2 #264
+2023/05/09-23:25:18.901 2d013 Delete type=2 #5
+2023/05/09-23:25:18.902 2d013 Delete type=2 #268
+2023/05/10-01:51:59.283 2b72b Level-0 table #271: started
+2023/05/10-01:51:59.433 2b72b Level-0 table #271: 1084557 bytes OK
+2023/05/10-01:51:59.481 2b72b Delete type=0 #266
+2023/05/10-10:40:57.210 23b57 Compacting 1@1 + 1@2 files
+2023/05/10-10:40:57.284 23b57 Generated table #272@1: 15472 keys, 480066 bytes
+2023/05/10-10:40:57.284 23b57 Compacted 1@1 + 1@2 files => 480066 bytes
+2023/05/10-10:40:57.322 23b57 compacted to: files[ 0 0 1 0 0 0 0 ]
+2023/05/10-10:40:57.329 23b57 Delete type=2 #271
+2023/05/10-10:40:57.339 23b57 Delete type=2 #269
+2023/05/10-16:14:47.353 3e427 Level-0 table #274: started
+2023/05/10-16:14:47.521 3e427 Level-0 table #274: 1209105 bytes OK
+2023/05/10-16:14:47.522 3e427 MANIFEST write: IO error: /Users/apple/Documents/whatsapp-web-server/.wwebjs_auth/session-YOUR_CLIENT_ID/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb: Unable to open directory (ChromeMethodBFE: 19::SyncParent::5)

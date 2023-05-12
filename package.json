@@ -1,0 +1,22 @@
+{
+  "name": "whatsapp-web-server",
+  "version": "1.0.0",
+  "description": "A server application for Churchplus Whatsapp Web integration",
+  "main": "index.js",
+  "engines": {
+    "node": "14.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.1.1",
+    "socket.io": "^4.6.1",
+    "whatsapp-web.js": "^1.19.5",
+    "wwebjs-mongo": "^1.1.0"
+  }
+}

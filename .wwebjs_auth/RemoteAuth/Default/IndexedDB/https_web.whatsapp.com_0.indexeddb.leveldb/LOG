@@ -1,0 +1,6 @@
+2023/05/11-05:25:47.262 410b Creating DB /Users/apple/Documents/whatsapp-web-server/.wwebjs_auth/RemoteAuth/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb since it was missing.
+2023/05/11-05:25:47.308 410b Reusing MANIFEST /Users/apple/Documents/whatsapp-web-server/.wwebjs_auth/RemoteAuth/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2023/05/11-05:25:47.419 f03 Level-0 table #5: started
+2023/05/11-05:25:47.455 f03 Level-0 table #5: 7472 bytes OK
+2023/05/11-05:25:47.515 f03 Delete type=0 #3
+2023/05/11-05:25:47.516 f03 Manual compaction at level-0 from '\x00\x01\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x02\x00\x00\x00' @ 0 : 0; will stop at (end)

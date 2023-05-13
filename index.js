@@ -7,15 +7,23 @@ const http = require("http");
 const server = http.createServer(app);
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
+const cors = require('cors')
+
+app.use(express.json())
+
+app.use(cors({
+    origin: '*'
+}))
 // import { Server } from "socket.io";
 // const { Server }  = require("socket.io")
 const io = require('socket.io')(server, {
     cors: {
         // origin: 'http://localhost:8080',
-        origin: 'https://my.churchplus.co',
+        origin: '*',
         methods: ['GET', 'POST'],
     },
 });
+
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
 

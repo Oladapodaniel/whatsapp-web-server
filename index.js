@@ -29,16 +29,25 @@ app.use((req, res, next) => {
   
     next();
   });
-  
+
 // import { Server } from "socket.io";
-// const { Server }  = require("socket.io")
-const io = require('socket.io')(server, {
+const { Server }  = require("socket.io")
+// const io  = require("socket.io")('https')
+const io = new Server(server, {
     cors: {
         // origin: 'http://localhost:8080',
         origin: '*',
         methods: ['GET', 'POST'],
     },
-});
+  });
+
+// const io = require('socket.io')(server, {
+//     cors: {
+//         // origin: 'http://localhost:8080',
+//         origin: '*',
+//         methods: ['GET', 'POST'],
+//     },
+// });
 
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
@@ -50,10 +59,6 @@ mongoose.connect(MONGODB_URI).then(() => {
     console.log('connected to mongodb')
     store = new MongoStore({ mongoose: mongoose });
 });
-
-server.listen(port, () => {
-    console.log('Server is running on the port', port)
-})
 
 // INITIALIZE VARAIBLES
 
@@ -202,6 +207,12 @@ const getAllChats = async (client, socket, id) => {
 // ============================================================================================
 
   
+
+server.listen(port, () => {
+    console.log('Server is running on the port', port)
+})
+
+
 
 
 

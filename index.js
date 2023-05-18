@@ -9,26 +9,26 @@ const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const cors = require('cors')
 
-app.use(express.json())
+// app.use(express.json())
 
-app.use(cors({
-    origin: '*'
-}))
+// app.use(cors({
+//     origin: '*'
+// }))
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
+// app.use((req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header(
+//       "Access-Control-Allow-Headers",
+//       "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//     );
   
-    if (req.method == "OPTIONS") {
-      res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
-      return res.status(200).json({});
-    }
+//     if (req.method == "OPTIONS") {
+//       res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
+//       return res.status(200).json({});
+//     }
   
-    next();
-  });
+//     next();
+//   });
 
 // import { Server } from "socket.io";
 const { Server }  = require("socket.io")
@@ -36,7 +36,7 @@ const { Server }  = require("socket.io")
 const io = new Server(server, {
     cors: {
         // origin: 'http://localhost:8080',
-        origin: '*',
+        origin: 'https://cms-git-dapobackup-oladapodaniel.vercel.app',
         methods: ['GET', 'POST'],
     },
   });
@@ -125,10 +125,14 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: false,
         },
-        authStrategy: new RemoteAuth({
-            clientId: id,
-            store: store,
-            backupSyncIntervalMs: 300000
+        // authStrategy: new RemoteAuth({
+        //     clientId: id,
+        //     store: store,
+        //     backupSyncIntervalMs: 300000
+        // })
+        authStrategy: new LocalAuth({
+            
+            clientId: id
         })
     })
 
@@ -148,6 +152,7 @@ const getWhatsappSession = (id, socket) => {
             message: "client is ready"
         })
         getAllChats(client, socket, id);
+        getChatById(client);
     });
 
     client.initialize();
@@ -178,12 +183,41 @@ io.on('connection', (socket) => {
         console.log('retrieved session id', sessionId)
         getWhatsappSession(id, socket)
     })
-    socket.on('sendwhatsappmessage', ({ phone_number, message }) => {
+    socket.on('sendwhatsappmessage', ({ phone_number, message, type }) => {
         console.log('sending message')
+        
         const client = allSessionObject[sessionId];
         console.log(sessionId, 'sesionid here')
-        const chatId = phone_number.substring(1) + "@c.us";
-        client.sendMessage(chatId, message);
+        console.log(phone_number, 'PHNOENUMBER')
+        if (type == 'single') {
+            const chatId = phone_number.substring(1) + "@c.us";
+            client.sendMessage(chatId, message).then(() => {
+                socket.emit('messagesent', {
+                    status: 200,
+                    message: 'Message sent successfully'
+                })
+            })
+        }   else {
+            phone_number.forEach(number => {
+                if (number.substring(0, 1) == '+') {
+                    const chatId = number.substring(1) + "@c.us";
+                    client.sendMessage(chatId, message).then(() => {
+                        socket.emit('messagesent', {
+                            status: 200,
+                            message: 'Message sent successfully'
+                        })
+                    })
+                } else {
+                    const chatId = number + "@c.us";
+                    client.sendMessage(chatId, message).then(() => {
+                        socket.emit('messagesent', {
+                            status: 200,
+                            message: 'Message sent successfully'
+                        })
+                    })
+                }
+            })
+        }
     })
   });
 
@@ -196,13 +230,31 @@ io.on('connection', (socket) => {
 const getAllChats = async (client, socket, id) => {
     const chats = await client.pupPage.evaluate(async () => {
         const chats = await window.WWebJS.getChats();
-        return JSON.stringify(chats)
+        return chats
     })
     socket.emit('allchats', {
         id,
         chats,
         message: 'Here are all chats'
     })
+}
+
+
+// ------------------------------------------------------------------------------------------
+// GET CHAT BY ID
+
+const getChatById = async (client) => {
+    const chatId = '2348035705192@c.us'
+    // const chat = await client.pupPage.evaluate(async (client) => {
+        const chat = await client.getChatById(chatId);
+        // console.log(chat)
+    // })
+    console.log(chat)
+    // socket.emit('allchats', {
+    //     id,
+    //     chats,
+    //     message: 'Here are all chats'
+    // })
 }
 
 

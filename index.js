@@ -30,6 +30,18 @@ app.use((req, res, next) => {
     next();
   });
 
+  app.get('/', (req, res) => {
+    res.send('<h1>Node application</h1>');
+  });
+
+  app.listen(3000, () => {
+    console.log(`Server is running on port ${3000}`);
+  });
+
+  server.listen(port, () => {
+    console.log('Server is running on the port', port)
+})
+
 // import { Server } from "socket.io";
 const { Server }  = require("socket.io")
 // const io  = require("socket.io")('https')
@@ -260,11 +272,7 @@ const getChatById = async (client) => {
 
 // ============================================================================================
 
-  
 
-server.listen(port, () => {
-    console.log('Server is running on the port', port)
-})
 
 
 

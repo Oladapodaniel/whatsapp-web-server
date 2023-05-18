@@ -34,10 +34,6 @@ app.use((req, res, next) => {
     res.send('<h1>Node application</h1>');
   });
 
-  app.listen(3000, () => {
-    console.log(`Server is running on port ${3000}`);
-  });
-
   server.listen(port, () => {
     console.log('Server is running on the port', port)
 })

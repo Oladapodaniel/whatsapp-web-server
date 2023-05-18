@@ -34,9 +34,9 @@ app.use((req, res, next) => {
     res.send('<h1>Node application</h1>');
   });
 
-  server.listen(port, () => {
-    console.log('Server is running on the port', port)
-})
+//   app.listen(port, () => {
+//     console.log('Server is running on the port', port)
+// })
 
 // import { Server } from "socket.io";
 const { Server }  = require("socket.io")
@@ -44,11 +44,15 @@ const { Server }  = require("socket.io")
 const io = new Server(server, {
     cors: {
         // origin: 'http://localhost:8080',
-        origin: '*',
+        origin: 'https://cms-git-dapobackup-oladapodaniel.vercel.app',
+        // credentials: true,
         methods: ['GET', 'POST'],
     },
   });
 
+  server.listen(port, () => {
+    console.log('running at', port)
+  });
 //   io.set("origins", "*:*");
 
 // const io = require('socket.io')(server, {

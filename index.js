@@ -31,15 +31,17 @@ const cors = require('cors')
 //   });
 
 // import { Server } from "socket.io";
-const { Server }  = require("socket.io")
+// const { Server }  = require("socket.io")
 // const io  = require("socket.io")('https')
-const io = new Server(server, {
-    cors: {
-        // origin: 'http://localhost:8080',
-        origin: 'https://cms-git-dapobackup-oladapodaniel.vercel.app',
-        methods: ['GET', 'POST'],
-    },
-  });
+// const io = new Server(server, {
+//     cors: {
+//         // origin: 'http://localhost:8080',
+//         origin: 'https://cms-git-dapobackup-oladapodaniel.vercel.app',
+//         methods: ['GET', 'POST'],
+//     },
+//   });
+
+  const io = require('socket.io')(server, {cors: {origin: "*"}});
 
 //   io.set("origins", "*:*");
 

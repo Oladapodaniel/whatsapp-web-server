@@ -6,18 +6,8 @@
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/socket.io/**",
-      "destination": "/socket.io"
-    },
-    {
-      "source": "/socket.io",
-      "destination": "/_socket.io"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
-    }
-  ]
+    "rewrites": [
+      { "source": "/socket.io/:path*", "destination": "/_socket.io/:path*" },
+      { "source": "/:path*", "destination": "/:path*" }
+    ]  
 }

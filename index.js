@@ -5,47 +5,47 @@ const app = express();
 const port = process.env.PORT || 3001;
 const http = require("http");
 const server = http.createServer(app);
+const { Server }  = require("socket.io")
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const cors = require('cors')
+const puppeteer = require('puppeteer');
+const os = require('os');
+const path = require('path');
+// Get the user's home directory
+const homeDir = os.homedir();
 
+// Construct the session directory path
+const sessionPath = path.join(homeDir, '.wwebjs_auth');
 // app.use(express.json())
 
 app.use(cors({
     origin: '*'
 }))
 
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
+// app.use((req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header(
+//       "Access-Control-Allow-Headers",
+//       "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//     );
   
-    if (req.method == "OPTIONS") {
-      res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
-      return res.status(200).json({});
-    }
+//     if (req.method == "OPTIONS") {
+//       res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
+//       return res.status(200).json({});
+//     }
   
-    next();
-  });
+//     next();
+//   });
 
   app.get('/', (req, res) => {
     res.send('<h1>Node application</h1>');
   });
 
-//   app.listen(port, () => {
-//     console.log('Server is running on the port', port)
-// })
 
-// import { Server } from "socket.io";
-const { Server }  = require("socket.io")
-// const io  = require("socket.io")('https')
 const io = new Server(server, {
     cors: {
-        // origin: 'http://localhost:8080',
         origin: '*',
-        // credentials: true,
         methods: ['GET', 'POST'],
     },
   });
@@ -53,15 +53,6 @@ const io = new Server(server, {
   server.listen(port, () => {
     console.log('running at', port)
   });
-//   io.set("origins", "*:*");
-
-// const io = require('socket.io')(server, {
-//     cors: {
-//         // origin: 'http://localhost:8080',
-//         origin: '*',
-//         methods: ['GET', 'POST'],
-//     },
-// });
 
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
@@ -136,15 +127,16 @@ const getWhatsappSession = (id, socket) => {
     const client = new Client({
         puppeteer: {
             headless: true,
+            executablePath: puppeteer.executablePath()
         },
         // authStrategy: new RemoteAuth({
         //     clientId: id,
         //     store: store,
         //     backupSyncIntervalMs: 300000
         // })
-        authStrategy: new LocalAuth({
-            
-            clientId: id
+        authStrategy: new RemoteAuth({
+            clientId: id,
+            sessionPath: sessionPath
         })
     })
 

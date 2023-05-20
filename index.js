@@ -127,7 +127,7 @@ const getWhatsappSession = (id, socket) => {
     const client = new Client({
         puppeteer: {
             headless: true,
-            executablePath: puppeteer.executablePath()
+            // executablePath: puppeteer.executablePath()
         },
         // authStrategy: new RemoteAuth({
         //     clientId: id,

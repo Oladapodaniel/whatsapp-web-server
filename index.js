@@ -132,11 +132,11 @@ const getWhatsappSession = (id, socket) => {
         // authStrategy: new RemoteAuth({
         //     clientId: id,
         //     store: store,
-        //     backupSyncIntervalMs: 300000
         // })
         authStrategy: new RemoteAuth({
             clientId: id,
-            sessionPath: sessionPath
+            sessionPath: sessionPath,
+            backupSyncIntervalMs: 300000
         })
     })
 

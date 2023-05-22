@@ -9,11 +9,11 @@ const { Server }  = require("socket.io")
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const cors = require('cors')
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 const os = require('os');
 const path = require('path');
-// Get the user's home directory
 const homeDir = os.homedir();
+// const store = require('./remoteDatabase');
 
 // Construct the session directory path
 const sessionPath = path.join(homeDir, '.wwebjs_auth');
@@ -65,6 +65,7 @@ mongoose.connect(MONGODB_URI).then(() => {
     store = new MongoStore({ mongoose: mongoose });
 });
 
+
 // INITIALIZE VARAIBLES
 
 let allSessionObject = {};
@@ -104,6 +105,7 @@ client.on('authenticated', () => {
 
 client.on('ready', () => {
     allSessionObject[id] = client
+
     console.log('Client is ready!');
     socket.emit('ready', {
         id,
@@ -124,18 +126,20 @@ client.initialize();
 
 // RETRIEVE AUTHENTICATED SESSION
 const getWhatsappSession = (id, socket) => {
+    // console.log(store, 'stre')
     const client = new Client({
         puppeteer: {
-            headless: true,
+            headless: false,
             // executablePath: puppeteer.executablePath()
         },
-        // authStrategy: new RemoteAuth({
+        // authStrategy: new LocalAuth({
         //     clientId: id,
-        //     store: store,
-        // })
+        // }),
+        restartOnAuthFail: true,
         authStrategy: new RemoteAuth({
             clientId: id,
-            sessionPath: sessionPath,
+            // sessionPath: sessionPath,
+            store: store,
             backupSyncIntervalMs: 300000
         })
     })
@@ -148,16 +152,28 @@ const getWhatsappSession = (id, socket) => {
         })
     })
 
+    client.on('authenticated', () => {
+        // const sessionData = client.session;
+        // console.log(session)
+        console.log('Client is Authenticated')
+    })
+
     client.on('ready', () => {
         console.log('Client is ready!');
         allSessionObject[id] = client
+        // console.log(allSessionObject[id]);
         socket.emit("ready", {
             id,
             message: "client is ready"
         })
-        getAllChats(client, socket, id);
-        getChatById(client);
+        // getAllChats(client, socket, id);
+        // getChatById(client);
     });
+
+
+    client.on('remote_session_saved', () => {
+        console.log('remote session saved')
+    })
 
     client.initialize();
 }

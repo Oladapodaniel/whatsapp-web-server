@@ -130,6 +130,7 @@ const getWhatsappSession = (id, socket) => {
     const client = new Client({
         puppeteer: {
             headless: true,
+            args: ['--no-sandbox'],
             // executablePath: puppeteer.executablePath()
         },
         // authStrategy: new LocalAuth({

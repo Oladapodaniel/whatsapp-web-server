@@ -136,7 +136,6 @@ const getWhatsappSession = (id, socket) => {
         // authStrategy: new LocalAuth({
         //     clientId: id,
         // }),
-        restartOnAuthFail: true,
         authStrategy: new RemoteAuth({
             clientId: id,
             // sessionPath: sessionPath,

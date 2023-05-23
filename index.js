@@ -13,6 +13,7 @@ const cors = require('cors')
 const os = require('os');
 const path = require('path');
 const homeDir = os.homedir();
+const qrcode = require('qrcode-terminal');
 // const store = require('./remoteDatabase');
 
 // Construct the session directory path
@@ -146,6 +147,7 @@ const getWhatsappSession = (id, socket) => {
 
     client.on('qr', (qr) => {
         console.log('retrieved remote session', qr)
+        qrcode.generate(qr, {small: true});
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'

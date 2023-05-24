@@ -209,35 +209,37 @@ io.on('connection', (socket) => {
         console.log('sending message')
         
         const client = allSessionObject[sessionId];
-        console.log(sessionId, 'sesionid here')
         console.log(phone_number, 'PHNOENUMBER')
         if (type == 'single') {
-            const chatId = phone_number.substring(1) + "@c.us";
+            const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
+            console.log(chatId, 1)
             client.sendMessage(chatId, message).then(() => {
                 socket.emit('messagesent', {
                     status: 200,
-                    message: 'Message sent successfully'
+                    message: 'Message sent successfully',
+                    id: 'single'
                 })
             })
         }   else {
             phone_number.forEach(number => {
                 if (number.substring(0, 1) == '+') {
-                    const chatId = number.substring(1) + "@c.us";
+                    const chatId = number.trim().replaceAll(" ", "").substring(1) + "@c.us";
+                    console.log(chatId, 2)
                     client.sendMessage(chatId, message).then(() => {
-                        socket.emit('messagesent', {
-                            status: 200,
-                            message: 'Message sent successfully'
-                        })
+                        console.log('message sent')
                     })
                 } else {
-                    const chatId = number + "@c.us";
+                    const chatId = number.trim().replaceAll(" ", "") + "@c.us";
+                    console.log(chatId, 3)
                     client.sendMessage(chatId, message).then(() => {
-                        socket.emit('messagesent', {
-                            status: 200,
-                            message: 'Message sent successfully'
-                        })
+                        console.log('message sent')
                     })
                 }
+            })
+            socket.emit('messagesent', {
+                status: 200,
+                message: 'Message sent successfully',
+                id: 'multiple'
             })
         }
     })

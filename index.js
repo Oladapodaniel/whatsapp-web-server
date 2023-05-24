@@ -168,7 +168,7 @@ const getWhatsappSession = (id, socket) => {
             id,
             message: "client is ready"
         })
-        // getAllChats(client, socket, id);
+        getAllChats(client, socket, id);
         // getChatById(client);
     });
 

@@ -13,7 +13,7 @@ const cors = require('cors')
 const os = require('os');
 const path = require('path');
 const homeDir = os.homedir();
-const qrcode = require('qrcode-terminal');
+// const qrcode = require('qrcode-terminal');
 // const store = require('./remoteDatabase');
 
 // Construct the session directory path
@@ -58,7 +58,7 @@ const io = new Server(server, {
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
 
-const MONGODB_URI = "mongodb+srv://oladapodaniel10:EdL7yYUcuLDAF0qB@cluster0.pmppn5h.mongodb.net/?retryWrites=true&w=majority"
+const MONGODB_URI = "mongodb+srv://oladapodaniel10:EdL7yYUcuLDAF0qB@cluster0.pmppn5h.mongodb.net/?retryWrites=true&w=majority&authSource=admin"
 
 let store;
 mongoose.connect(MONGODB_URI).then(() => {
@@ -139,7 +139,6 @@ const getWhatsappSession = (id, socket) => {
         // }),
         authStrategy: new RemoteAuth({
             clientId: id,
-            // sessionPath: sessionPath,
             store: store,
             backupSyncIntervalMs: 300000
         })
@@ -147,7 +146,7 @@ const getWhatsappSession = (id, socket) => {
 
     client.on('qr', (qr) => {
         console.log('retrieved remote session', qr)
-        qrcode.generate(qr, {small: true});
+        // qrcode.generate(qr, {small: true});
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'
@@ -222,15 +221,16 @@ io.on('connection', (socket) => {
             })
         }   else {
             phone_number.forEach(number => {
+                number = number.trim().replaceAll(" ", "") + "@c.us";
                 if (number.substring(0, 1) == '+') {
-                    const chatId = number.trim().replaceAll(" ", "").substring(1) + "@c.us";
-                    console.log(chatId, 2)
+                    const chatId = number.substring(1)
+                    // console.log(chatId, 2)
                     client.sendMessage(chatId, message).then(() => {
                         console.log('message sent')
                     })
                 } else {
-                    const chatId = number.trim().replaceAll(" ", "") + "@c.us";
-                    console.log(chatId, 3)
+                    const chatId = number
+                    // console.log(chatId, 3)
                     client.sendMessage(chatId, message).then(() => {
                         console.log('message sent')
                     })

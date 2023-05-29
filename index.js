@@ -132,11 +132,7 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox'],
-            // executablePath: puppeteer.executablePath()
         },
-        // authStrategy: new LocalAuth({
-        //     clientId: id,
-        // }),
         authStrategy: new RemoteAuth({
             clientId: id,
             store: store,
@@ -154,26 +150,26 @@ const getWhatsappSession = (id, socket) => {
     })
 
     client.on('authenticated', () => {
-        // const sessionData = client.session;
-        // console.log(session)
         console.log('Client is Authenticated')
     })
 
     client.on('ready', () => {
         console.log('Client is ready!');
         allSessionObject[id] = client
-        // console.log(allSessionObject[id]);
         socket.emit("ready", {
             id,
             message: "client is ready"
         })
         getAllChats(client, socket, id);
-        // getChatById(client);
     });
 
 
     client.on('remote_session_saved', () => {
         console.log('remote session saved')
+        socket.emit('remotesessionsaved', {
+            id,
+            message: 'Remote session saved to mongodb'
+        })
     })
 
     client.initialize();

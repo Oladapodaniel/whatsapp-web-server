@@ -200,15 +200,18 @@ io.on('connection', (socket) => {
         console.log('retrieved session id', sessionId)
         getWhatsappSession(id, socket)
     })
+
+
     socket.on('sendwhatsappmessage', ({ phone_number, message, type }) => {
         console.log('sending message')
         
         const client = allSessionObject[sessionId];
-        console.log(phone_number, 'PHNOENUMBER')
+        console.log(phone_number, 'PHONENUMBER')
         if (type == 'single') {
             const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
             console.log(chatId, 1)
             client.sendMessage(chatId, message).then(() => {
+                console.log('message sent', 'single')
                 socket.emit('messagesent', {
                     status: 200,
                     message: 'Message sent successfully',
@@ -222,13 +225,13 @@ io.on('connection', (socket) => {
                     const chatId = number.substring(1)
                     // console.log(chatId, 2)
                     client.sendMessage(chatId, message).then(() => {
-                        console.log('message sent')
+                        console.log('message sent', 'multiple(+)')
                     })
                 } else {
                     const chatId = number
                     // console.log(chatId, 3)
                     client.sendMessage(chatId, message).then(() => {
-                        console.log('message sent')
+                        console.log('message sent', 'multiple()')
                     })
                 }
             })

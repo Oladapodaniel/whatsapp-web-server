@@ -1,6 +1,6 @@
 // Create a basic app with express
 const express = require('express');
-const { Client, LocalAuth, RemoteAuth } = require('whatsapp-web.js');
+const { Client, RemoteAuth } = require('whatsapp-web.js');
 const app = express();
 const port = process.env.PORT || 3001;
 const http = require("http");
@@ -8,21 +8,21 @@ const server = http.createServer(app);
 const { Server }  = require("socket.io")
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
-const cors = require('cors')
+// const cors = require('cors')
 // const puppeteer = require('puppeteer');
-const os = require('os');
-const path = require('path');
-const homeDir = os.homedir();
+// const os = require('os');
+// const path = require('path');
+// const homeDir = os.homedir();
 // const qrcode = require('qrcode-terminal');
 // const store = require('./remoteDatabase');
 
 // Construct the session directory path
-const sessionPath = path.join(homeDir, '.wwebjs_auth');
+// const sessionPath = path.join(homeDir, '.wwebjs_auth');
 // app.use(express.json())
 
-app.use(cors({
-    origin: '*'
-}))
+// app.use(cors({
+//     origin: '*'
+// }))
 
 // app.use((req, res, next) => {
 //     res.header("Access-Control-Allow-Origin", "*");

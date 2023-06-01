@@ -229,7 +229,6 @@ io.on('connection', (socket) => {
                     })
                 } else {
                     const chatId = number
-                    // console.log(chatId, 3)
                     client.sendMessage(chatId, message).then(() => {
                         console.log('message sent', 'multiple()')
                     })

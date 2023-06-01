@@ -75,52 +75,52 @@ let sessionId = ""
 
 // CREATE NEW SESSION
 
-const createWhatsappSession = (id, socket) => {
-const client = new Client({
-    puppeteer: {
-        headless: false,
-    },
-    // auth: new LocalAuth({
-    //     secret: 'YOUR_SECRET',
-    //     clientId: id
-    // })
-    authStrategy: new RemoteAuth({
-        clientId: id,
-        store: store,
-        backupSyncIntervalMs: 300000
-    })
-})
+// const createWhatsappSession = (id, socket) => {
+// const client = new Client({
+//     puppeteer: {
+//         headless: false,
+//     },
+//     // auth: new LocalAuth({
+//     //     secret: 'YOUR_SECRET',
+//     //     clientId: id
+//     // })
+//     authStrategy: new RemoteAuth({
+//         clientId: id,
+//         store: store,
+//         backupSyncIntervalMs: 300000
+//     })
+// })
 
 
-client.on('qr', (qr) => {
-    // Generate and scan this code with your phone
-    console.log('QR RECEIVED', qr);
-    socket.emit('qr', {
-        qr
-    })
-});
+// client.on('qr', (qr) => {
+//     // Generate and scan this code with your phone
+//     console.log('QR RECEIVED', qr);
+//     socket.emit('qr', {
+//         qr
+//     })
+// });
 
-client.on('authenticated', () => {
-        console.log('Client is Authenticated')
-    })
+// client.on('authenticated', () => {
+//         console.log('Client is Authenticated')
+//     })
 
-client.on('ready', () => {
-    allSessionObject[id] = client
+// client.on('ready', () => {
+//     allSessionObject[id] = client
 
-    console.log('Client is ready!');
-    socket.emit('ready', {
-        id,
-        message: 'Client is ready!!!'
-    })
-    getAllChats(client, socket, id);
-});
+//     console.log('Client is ready!');
+//     socket.emit('ready', {
+//         id,
+//         message: 'Client is ready!!!'
+//     })
+//     getAllChats(client, socket, id);
+// });
 
-client.on('remote_session_saved', () => {
-    console.log('remote session saved')
-})
+// client.on('remote_session_saved', () => {
+//     console.log('remote session saved')
+// })
 
-client.initialize();
-}
+// client.initialize();
+// }
 
 
 

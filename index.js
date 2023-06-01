@@ -126,7 +126,6 @@ client.initialize();
 
 // RETRIEVE AUTHENTICATED SESSION
 const getWhatsappSession = (id, socket) => {
-    // console.log(store, 'stre')
     const client = new Client({
         puppeteer: {
             headless: true,

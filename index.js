@@ -216,7 +216,6 @@ io.on('connection', (socket) => {
                 number = number.trim().replaceAll(" ", "") + "@c.us";
                 if (number.substring(0, 1) == '+') {
                     const chatId = number.substring(1)
-                    // console.log(chatId, 2)
                     client.sendMessage(chatId, message).then(() => {
                         console.log('message sent', 'multiple(+)')
                     })

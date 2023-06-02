@@ -80,10 +80,6 @@ const client = new Client({
     puppeteer: {
         headless: false,
     },
-    // auth: new LocalAuth({
-    //     secret: 'YOUR_SECRET',
-    //     clientId: id
-    // })
     authStrategy: new RemoteAuth({
         clientId: id,
         store: store,

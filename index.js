@@ -136,7 +136,6 @@ const getWhatsappSession = (id, socket) => {
 
     client.on('qr', (qr) => {
         console.log('retrieved remote session', qr)
-        // qrcode.generate(qr, {small: true});
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node functions/index",
-    "build": "netlify-lambda build functions"
+    "build": "netlify deploy --prod"
   },
   "author": "",
   "license": "ISC",

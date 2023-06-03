@@ -8,40 +8,28 @@ const server = http.createServer(app);
 const { Server }  = require("socket.io")
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
-// const cors = require('cors')
-// const puppeteer = require('puppeteer');
-// const os = require('os');
-// const path = require('path');
-// const homeDir = os.homedir();
-// const qrcode = require('qrcode-terminal');
-// const store = require('./remoteDatabase');
+const router = express.Router();
+const serverless = require('serverless-http');
 
-// Construct the session directory path
-// const sessionPath = path.join(homeDir, '.wwebjs_auth');
-// app.use(express.json())
 
-// app.use(cors({
-//     origin: '*'
-// }))
 
-// app.use((req, res, next) => {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header(
-//       "Access-Control-Allow-Headers",
-//       "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-//     );
-  
-//     if (req.method == "OPTIONS") {
-//       res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
-//       return res.status(200).json({});
-//     }
-  
-//     next();
+//   app.get('/', (req, res) => {
+//     res.send('<h1>Node application</h1>');
 //   });
 
-  app.get('/', (req, res) => {
-    res.send('<h1>Node application</h1>');
-  });
+router.get('/', (req, res) => {
+    res.send('Node app is running')
+})
+router.get('/add', (req, res) => {
+    res.send('New record added')
+})
+router.get('/demo', (req, res) => {
+    res.json([
+        { name: "Dapo", height: 23}
+    ])
+})
+app.use('/.netlify/functions/api', router);
+module.exports.handler = serverless(app)
 
 
 const io = new Server(server, {

@@ -4,3 +4,5 @@ node_modules/
 *.zip
 .env
 .vscode
+# Local Netlify folder
+.netlify

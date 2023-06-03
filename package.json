@@ -7,7 +7,8 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "node functions/index"
+    "start": "node functions/index",
+    "build": "./node_modules/.bin/netlify-lambda build functions"
   },
   "author": "",
   "license": "ISC",

@@ -7,8 +7,7 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "node functions/index",
-    "build": "netlify deploy --prod"
+    "start": "node functions/index"
   },
   "author": "",
   "license": "ISC",

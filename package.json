@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node functions/index",
-    "build": "netlify deploy --prod"
+    "build": "babel src -d dist"
   },
   "author": "",
   "license": "ISC",
@@ -23,5 +23,9 @@
     "socket.io": "^4.6.1",
     "whatsapp-web.js": "^1.21.0",
     "wwebjs-mongo": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.1",
+    "@babel/preset-env": "^7.22.4"
   }
 }

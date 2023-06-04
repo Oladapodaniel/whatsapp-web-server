@@ -1,5 +1,5 @@
 [build]
-    functions-build = "functions"
+    functions = "functions"
     command = "CI= npm run build"
 
 [[redirects]]

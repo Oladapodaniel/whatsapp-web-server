@@ -13,23 +13,23 @@ const serverless = require('serverless-http');
 
 
 
-//   app.get('/', (req, res) => {
-//     res.send('<h1>Node application</h1>');
-//   });
+  app.get('/', (req, res) => {
+    res.send('<h1>Node application</h1>');
+  });
 
-router.get('/', (req, res) => {
-    res.send('Node app is running')
-})
-router.get('/add', (req, res) => {
-    res.send('New record added')
-})
-router.get('/demo', (req, res) => {
-    res.json([
-        { name: "Dapo", height: 23}
-    ])
-})
-app.use('/.netlify/functions/api', router);
-module.exports.handler = serverless(app)
+// router.get('/', (req, res) => {
+//     res.send('Node app is running')
+// })
+// router.get('/add', (req, res) => {
+//     res.send('New record added')
+// })
+// router.get('/demo', (req, res) => {
+//     res.json([
+//         { name: "Dapo", height: 23}
+//     ])
+// })
+// app.use('/.netlify/functions/api', router);
+// module.exports.handler = serverless(app)
 
 
 const io = new Server(server, {

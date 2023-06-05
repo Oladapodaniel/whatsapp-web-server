@@ -7,8 +7,12 @@
     "node": "16.x"
   },
   "scripts": {
+<<<<<<< HEAD
     "start": "node functions/index",
     "build": "babel src -d dist"
+=======
+    "start": "node functions/index"
+>>>>>>> 30905ba (removed firbase directories)
   },
   "author": "",
   "license": "ISC",

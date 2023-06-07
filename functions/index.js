@@ -221,6 +221,22 @@ io.on('connection', (socket) => {
             })
         }
     })
+
+
+    socket.on('sendtogroups', ({ groups, message }) => {
+        const client = allSessionObject[sessionId];
+        console.log(groups)
+            groups.forEach(group => {
+            const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+            client.sendMessage(groupId, message).then(() => {
+                console.log('message sent to group')
+                socket.emit('groupmessagesent', {
+                    status: 200,
+                    message: 'Group message sent successfully'
+                })
+            })
+        })
+    })
   });
 
 

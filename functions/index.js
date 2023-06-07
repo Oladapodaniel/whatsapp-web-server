@@ -8,8 +8,8 @@ const server = http.createServer(app);
 const { Server }  = require("socket.io")
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
-const router = express.Router();
-const serverless = require('serverless-http');
+// const router = express.Router();
+// const serverless = require('serverless-http');
 
 
 

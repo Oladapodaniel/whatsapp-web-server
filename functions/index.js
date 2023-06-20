@@ -1,21 +1,36 @@
 // Create a basic app with express
 const express = require('express');
-const { Client, RemoteAuth } = require('whatsapp-web.js');
+const {
+    Client,
+    RemoteAuth
+} = require('whatsapp-web.js');
+const {
+    MessageMedia
+} = require('whatsapp-web.js');
 const app = express();
 const port = process.env.PORT || 3001;
 const http = require("http");
 const server = http.createServer(app);
-const { Server }  = require("socket.io")
-const { MongoStore } = require('wwebjs-mongo');
+const {
+    Server
+} = require("socket.io")
+const {
+    MongoStore
+} = require('wwebjs-mongo');
 const mongoose = require('mongoose');
+const puppeteer = require('puppeteer');
 // const router = express.Router();
 // const serverless = require('serverless-http');
 
 
 
-  app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     res.send('<h1>Node application</h1>');
-  });
+});
+
+const executablePath = puppeteer.executablePath();
+console.log('======', executablePath, '======')
+
 
 // router.get('/', (req, res) => {
 //     res.send('Node app is running')
@@ -37,11 +52,11 @@ const io = new Server(server, {
         origin: '*',
         methods: ['GET', 'POST'],
     },
-  });
+});
 
-  server.listen(port, () => {
+server.listen(port, () => {
     console.log('running at', port)
-  });
+});
 
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
@@ -51,7 +66,9 @@ const MONGODB_URI = "mongodb+srv://oladapodaniel10:EdL7yYUcuLDAF0qB@cluster0.pmp
 let store;
 mongoose.connect(MONGODB_URI).then(() => {
     console.log('connected to mongodb')
-    store = new MongoStore({ mongoose: mongoose });
+    store = new MongoStore({
+        mongoose: mongoose
+    });
 });
 
 
@@ -64,46 +81,46 @@ let sessionId = ""
 // CREATE NEW SESSION
 
 const createWhatsappSession = (id, socket) => {
-const client = new Client({
-    puppeteer: {
-        headless: false,
-    },
-    authStrategy: new RemoteAuth({
-        clientId: id,
-        store: store,
-        backupSyncIntervalMs: 300000
+    const client = new Client({
+        puppeteer: {
+            headless: false,
+        },
+        authStrategy: new RemoteAuth({
+            clientId: id,
+            store: store,
+            backupSyncIntervalMs: 300000
+        })
     })
-})
 
 
-client.on('qr', (qr) => {
-    // Generate and scan this code with your phone
-    console.log('QR RECEIVED', qr);
-    socket.emit('qr', {
-        qr
-    })
-});
+    client.on('qr', (qr) => {
+        // Generate and scan this code with your phone
+        console.log('QR RECEIVED', qr);
+        socket.emit('qr', {
+            qr
+        })
+    });
 
-client.on('authenticated', () => {
+    client.on('authenticated', () => {
         console.log('Client is Authenticated')
     })
 
-client.on('ready', () => {
-    allSessionObject[id] = client
+    client.on('ready', () => {
+        allSessionObject[id] = client
 
-    console.log('Client is ready!');
-    socket.emit('ready', {
-        id,
-        message: 'Client is ready!!!'
+        console.log('Client is ready!');
+        socket.emit('ready', {
+            id,
+            message: 'Client is ready!!!'
+        })
+        getAllChats(client, socket, id);
+    });
+
+    client.on('remote_session_saved', () => {
+        console.log('remote session saved')
     })
-    getAllChats(client, socket, id);
-});
 
-client.on('remote_session_saved', () => {
-    console.log('remote session saved')
-})
-
-client.initialize();
+    client.initialize();
 }
 
 
@@ -114,6 +131,7 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: puppeteer.executablePath()
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -161,52 +179,96 @@ const getWhatsappSession = (id, socket) => {
 
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
+
+    // Keep socket alive
+    socket.on('pong', () => {
+        console.log('Pong received from client');
+    })
+    
+    setInterval(() => {
+        console.log('ping');
+        socket.emit('ping', { beat : 1 });
+    }, 30000);
     socket.on('disconnect', () => {
-      console.log('user disconnected');
+        console.log('user disconnected');
     });
     socket.on('connected', (data) => {
-      console.log('connected to the server')
-      socket.emit('Hello', 'Hello form server')
+        console.log('connected to the server')
+        socket.emit('Hello', 'Hello form server')
     })
     socket.on('createsession', (data) => {
         console.log('SESSION_ID', data)
-        const { id } = data
+        const {
+            id
+        } = data
         createWhatsappSession(id, socket)
     })
-    
+
     socket.on('getsession', (data) => {
         console.log('GET_SESSION_ID', data)
-        const { id } = data
+        const {
+            id
+        } = data
         sessionId = data.id
         console.log('retrieved session id', sessionId)
         getWhatsappSession(id, socket)
     })
 
 
-    socket.on('sendwhatsappmessage', ({ phone_number, message, type }) => {
+    socket.on('sendwhatsappmessage', ({
+        phone_number,
+        message,
+        type,
+        whatsappAttachment
+    }) => {
         console.log('sending message')
-        
+
         const client = allSessionObject[sessionId];
         console.log(phone_number, 'PHONENUMBER')
+        console.log(whatsappAttachment, 'WhatsappAttachment')
+        // new Promise(async function(resolve, reject) {})
         if (type == 'single') {
             const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
             console.log(chatId, 1)
-            client.sendMessage(chatId, message).then(() => {
-                console.log('message sent', 'single')
-                socket.emit('messagesent', {
-                    status: 200,
-                    message: 'Message sent successfully',
-                    id: 'single'
+            if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+                const media = new MessageMedia(whatsappAttachment.mimeType, whatsappAttachment.base64);
+                client.sendMessage(chatId, media, {
+                    caption: message
+                }).then(() => {
+                    console.log('message sent', 'single')
+                    socket.emit('messagesent', {
+                        status: 200,
+                        message: 'Message sent successfully',
+                        id: 'single with media'
+                    })
                 })
-            })
-        }   else {
+            } else {
+                client.sendMessage(chatId, message).then(() => {
+                    console.log('message sent', 'single')
+                    socket.emit('messagesent', {
+                        status: 200,
+                        message: 'Message sent successfully',
+                        id: 'single'
+                    })
+                })
+            }
+        } else {
             phone_number.forEach(number => {
                 number = number.trim().replaceAll(" ", "") + "@c.us";
                 if (number.substring(0, 1) == '+') {
                     const chatId = number.substring(1)
-                    client.sendMessage(chatId, message).then(() => {
-                        console.log('message sent', 'multiple(+)')
-                    })
+                    if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+                        const media = new MessageMedia(whatsappAttachment.mimeType, whatsappAttachment.base64);
+                        client.sendMessage(chatId, media, {
+                            caption: message
+                        }).then(() => {
+                            console.log('message sent with media', 'multiple(+)')
+                        })
+                    } else {
+                        client.sendMessage(chatId, message).then(() => {
+                            console.log('message sent', 'multiple(+)')
+                        })
+                    }
                 } else {
                     const chatId = number
                     client.sendMessage(chatId, message).then(() => {
@@ -223,21 +285,58 @@ io.on('connection', (socket) => {
     })
 
 
-    socket.on('sendtogroups', ({ groups, message }) => {
+    socket.on('sendtogroups', ({
+        groups,
+        message,
+        whatsappAttachment
+    }) => {
         const client = allSessionObject[sessionId];
         console.log(groups)
+        console.log(whatsappAttachment)
+        if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
             groups.forEach(group => {
             const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-            client.sendMessage(groupId, message).then(() => {
-                console.log('message sent to group')
-                socket.emit('groupmessagesent', {
-                    status: 200,
-                    message: 'Group message sent successfully'
-                })
+            const media = new MessageMedia(whatsappAttachment.mimeType, whatsappAttachment.base64);
+            client.sendMessage(groupId, media, {
+                caption: message
+            }).then(() => {
+                console.log('message sent with media', 'multiple(+)')
             })
         })
+        } else {
+            groups.forEach(group => {
+                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+                client.sendMessage(groupId, message).then(() => {
+                    console.log('message sent to group')
+                    socket.emit('groupmessagesent', {
+                        status: 200,
+                        message: 'Group message sent successfully'
+                    })
+                })
+            })
+        }
     })
-  });
+
+    // socket.on('deleteremotesession' , async({ session }) => {
+    //     console.log(store, session);
+    //     try {
+    //         // let data = await store.delete({ session });
+    //         const mongoConn = mongoose.connection;
+    //        let data = await mongoConn.collection('test').deleteOne({ _id: session });
+    //         console.log(data, 'ssss');
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+
+    // })
+});
+
+/////////// CHANGE THE REMTE URL
+
+// ============================================================================================
+
+// Keep Scketr Alive
+
 
 
 // ============================================================================================
@@ -264,8 +363,8 @@ const getAllChats = async (client, socket, id) => {
 const getChatById = async (client) => {
     const chatId = '2348035705192@c.us'
     // const chat = await client.pupPage.evaluate(async (client) => {
-        const chat = await client.getChatById(chatId);
-        // console.log(chat)
+    const chat = await client.getChatById(chatId);
+    // console.log(chat)
     // })
     console.log(chat)
     // socket.emit('allchats', {
@@ -277,11 +376,6 @@ const getChatById = async (client) => {
 
 
 // ============================================================================================
-
-
-
-
-
 
 
 
@@ -358,7 +452,7 @@ const getChatById = async (client) => {
 
 //     });
 
-     
+
 
 //     client.on('error', (err) => {
 //         console.log(err);
@@ -421,7 +515,7 @@ const getChatById = async (client) => {
 //   console.log(2)
 //   const message = 'Hello, World!'; // replace with your message
 //   console.log(3)
-  
+
 //   chats.forEach(chat => {
 //       chat.sendMessage(message).then(() => {
 //           console.log(`Message sent to ${chat.name}`);

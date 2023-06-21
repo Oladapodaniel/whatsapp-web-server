@@ -19,6 +19,7 @@ const {
 } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 // const router = express.Router();
 // const serverless = require('serverless-http');
 
@@ -219,73 +220,96 @@ io.on('connection', (socket) => {
         // ========================
         let videbase64;
         let mimeType = whatsappAttachment.type
-        const reader = new FileReader();
-        reader.addEventListener("load", function (f) {
-          videoPlayer.value.src = reader.result;
-          videbase64 = f.target.result.split(",")[1];
-          console.log(f.target, "attachment");
-        });
+        // const reader = new FileReader();
+        // reader.addEventListener("load", function (f) {
+        //   videoPlayer.value.src = reader.result;
+        //   videbase64 = f.target.result.split(",")[1];
+        //   console.log(f.target, "attachment");
+        // });
         
-        if (whatsappAttachment) {
-          reader.readAsDataURL(whatsappAttachment);
-        }
-        // ============================
-        // new Promise(async function(resolve, reject) {})
-        if (type == 'single') {
-            const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
-            console.log(chatId, 1)
-            if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                const media = new MessageMedia(mimeType, videbase64);
-                client.sendMessage(chatId, media, {
-                    caption: message
-                }).then(() => {
-                    console.log('message sent', 'single')
-                    socket.emit('messagesent', {
-                        status: 200,
-                        message: 'Message sent successfully',
-                        id: 'single with media'
-                    })
+        // if (whatsappAttachment) {
+        //   reader.readAsDataURL(whatsappAttachment);
+        // }
+
+        
+
+// // Example usage
+// const file = {
+//   uid: 1687336543893,
+//   lastModified: 1679564528279,
+//   lastModifiedDate: new Date('Thu Mar 23 2023 10:42:08 GMT+0100 (West Africa Standard Time)'),
+//   name: 'Limoblaze_-_Jireh_My_Provider__CeeNaija.com_.mp3',
+//   size: 2748065,
+//   type: 'audio/mpeg',
+//   webkitRelativePath: '',
+// };
+
+fileToBase64(whatsappAttachment)
+  .then((base64) => {
+    console.log(base64);
+    videbase64 = base64
+    // ============================
+    // new Promise(async function(resolve, reject) {})
+    if (type == 'single') {
+        const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
+        console.log(chatId, 1)
+        if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+            const media = new MessageMedia(mimeType, videbase64);
+            client.sendMessage(chatId, media, {
+                caption: message
+            }).then(() => {
+                console.log('message sent', 'single')
+                socket.emit('messagesent', {
+                    status: 200,
+                    message: 'Message sent successfully',
+                    id: 'single with media'
                 })
-            } else {
-                client.sendMessage(chatId, message).then(() => {
-                    console.log('message sent', 'single')
-                    socket.emit('messagesent', {
-                        status: 200,
-                        message: 'Message sent successfully',
-                        id: 'single'
-                    })
-                })
-            }
+            })
         } else {
-            phone_number.forEach(number => {
-                number = number.trim().replaceAll(" ", "") + "@c.us";
-                if (number.substring(0, 1) == '+') {
-                    const chatId = number.substring(1)
-                    if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                        const media = new MessageMedia(mimeType, videbase64);
-                        client.sendMessage(chatId, media, {
-                            caption: message
-                        }).then(() => {
-                            console.log('message sent with media', 'multiple(+)')
-                        })
-                    } else {
-                        client.sendMessage(chatId, message).then(() => {
-                            console.log('message sent', 'multiple(+)')
-                        })
-                    }
+            client.sendMessage(chatId, message).then(() => {
+                console.log('message sent', 'single')
+                socket.emit('messagesent', {
+                    status: 200,
+                    message: 'Message sent successfully',
+                    id: 'single'
+                })
+            })
+        }
+    } else {
+        phone_number.forEach(number => {
+            number = number.trim().replaceAll(" ", "") + "@c.us";
+            if (number.substring(0, 1) == '+') {
+                const chatId = number.substring(1)
+                if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+                    const media = new MessageMedia(mimeType, videbase64);
+                    client.sendMessage(chatId, media, {
+                        caption: message
+                    }).then(() => {
+                        console.log('message sent with media', 'multiple(+)')
+                    })
                 } else {
-                    const chatId = number
                     client.sendMessage(chatId, message).then(() => {
-                        console.log('message sent', 'multiple()')
+                        console.log('message sent', 'multiple(+)')
                     })
                 }
-            })
-            socket.emit('messagesent', {
-                status: 200,
-                message: 'Message sent successfully',
-                id: 'multiple'
-            })
-        }
+            } else {
+                const chatId = number
+                client.sendMessage(chatId, message).then(() => {
+                    console.log('message sent', 'multiple()')
+                })
+            }
+        })
+        socket.emit('messagesent', {
+            status: 200,
+            message: 'Message sent successfully',
+            id: 'multiple'
+        })
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+
     })
 
 
@@ -339,9 +363,20 @@ io.on('connection', (socket) => {
 
 // ============================================================================================
 
-// Keep Scketr Alive
+// cnvert t base64
 
-
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(file.path, (error, data) => {
+        if (error) {
+          reject(error);
+        } else {
+          const base64 = data.toString('base64');
+          resolve(base64);
+        }
+      });
+    });
+  }
 
 // ============================================================================================
 //   CUSTOM FUNCTIONS AND WHATSAPP API METHODS CALL

@@ -76,54 +76,8 @@ mongoose.connect(MONGODB_URI).then(() => {
 // INITIALIZE VARAIBLES
 
 let allSessionObject = {};
-let sessionId = ""
 let mediaBase64 = ""
 
-
-// CREATE NEW SESSION
-
-const createWhatsappSession = (id, socket) => {
-    const client = new Client({
-        puppeteer: {
-            headless: false,
-        },
-        authStrategy: new RemoteAuth({
-            clientId: id,
-            store: store,
-            backupSyncIntervalMs: 300000
-        })
-    })
-
-
-    client.on('qr', (qr) => {
-        // Generate and scan this code with your phone
-        console.log('QR RECEIVED', qr);
-        socket.emit('qr', {
-            qr
-        })
-    });
-
-    client.on('authenticated', () => {
-        console.log('Client is Authenticated')
-    })
-
-    client.on('ready', () => {
-        allSessionObject[id] = client
-
-        console.log('Client is ready!');
-        socket.emit('ready', {
-            id,
-            message: 'Client is ready!!!'
-        })
-        getAllChats(client, socket, id);
-    });
-
-    client.on('remote_session_saved', () => {
-        console.log('remote session saved')
-    })
-
-    client.initialize();
-}
 
 
 
@@ -132,8 +86,8 @@ const getWhatsappSession = (id, socket) => {
     const client = new Client({
         puppeteer: {
             headless: true,
-            // args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            // executablePath: puppeteer.executablePath()
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: puppeteer.executablePath()
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -143,7 +97,7 @@ const getWhatsappSession = (id, socket) => {
     })
 
     client.on('qr', (qr) => {
-        console.log('retrieved remote session', qr)
+        console.log('retrieved qr code', qr)
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'
@@ -188,13 +142,6 @@ io.on('connection', (socket) => {
         console.log('connected to the server')
         socket.emit('Hello', 'Hello form server')
     })
-    socket.on('createsession', (data) => {
-        console.log('SESSION_ID', data)
-        const {
-            id
-        } = data
-        createWhatsappSession(id, socket)
-    })
 
     socket.on('chunk', (data) => {
         mediaBase64 += data
@@ -206,20 +153,21 @@ io.on('connection', (socket) => {
         const {
             id
         } = data
-        sessionId = data.id
-        console.log('retrieved session id', sessionId)
         getWhatsappSession(id, socket)
     })
 
 
     socket.on('sendwhatsappmessage', ({
+        id,
         phone_number,
         message,
         type,
         whatsappAttachment
     }) => {
         console.log('sending message')
-        const client = allSessionObject[sessionId];
+        const client = allSessionObject[id];
+
+        console.log(id, 'ID')
         console.log(phone_number, 'PHONENUMBER')
         console.log(whatsappAttachment, 'WhatsappAttachment')
 
@@ -284,11 +232,12 @@ io.on('connection', (socket) => {
 
 
     socket.on('sendtogroups', ({
+        id,
         groups,
         message,
         whatsappAttachment
     }) => {
-        const client = allSessionObject[sessionId];
+        const client = allSessionObject[id];
         console.log(groups)
         console.log(whatsappAttachment)
         if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {

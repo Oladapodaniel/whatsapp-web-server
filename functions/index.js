@@ -131,9 +131,9 @@ const createWhatsappSession = (id, socket) => {
 const getWhatsappSession = (id, socket) => {
     const client = new Client({
         puppeteer: {
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: puppeteer.executablePath()
+            headless: false,
+            // args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            // executablePath: puppeteer.executablePath()
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -227,7 +227,7 @@ io.on('connection', (socket) => {
             const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
             console.log(chatId, 1)
             if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+                const media = new MessageMedia.fromUrl("https://thenewcom.com/wp-content/uploads/2019/08/event-sunday-worship.jpg");
                 client.sendMessage(chatId, media, {
                     caption: message
                 }).then(() => {
@@ -254,7 +254,7 @@ io.on('connection', (socket) => {
                 if (number.substring(0, 1) == '+') {
                     const chatId = number.substring(1)
                     if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                        const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+                        const media = new MessageMedia.fromUrl("https://thenewcom.com/wp-content/uploads/2019/08/event-sunday-worship.jpg");
                         client.sendMessage(chatId, media, {
                             caption: message
                         }).then(() => {

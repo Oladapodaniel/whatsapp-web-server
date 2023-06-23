@@ -87,7 +87,7 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
         },
         authStrategy: new RemoteAuth({
             clientId: id,

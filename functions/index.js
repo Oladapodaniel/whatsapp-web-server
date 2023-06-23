@@ -87,7 +87,7 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: puppeteer.executablePath()
+            executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -161,7 +161,6 @@ io.on('connection', (socket) => {
         id,
         phone_number,
         message,
-        type,
         whatsappAttachment
     }) => {
         console.log('sending message')
@@ -171,64 +170,47 @@ io.on('connection', (socket) => {
         console.log(phone_number, 'PHONENUMBER')
         console.log(whatsappAttachment, 'WhatsappAttachment')
 
-        if (type == 'single') {
-            const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
-            console.log(chatId, 1)
-            if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                const media = new MessageMedia.fromUrl("https://thenewcom.com/wp-content/uploads/2019/08/event-sunday-worship.jpg");
-                client.sendMessage(chatId, media, {
-                    caption: message
-                }).then(() => {
-                    console.log('message sent', 'single')
-                    socket.emit('messagesent', {
-                        status: 200,
-                        message: 'Message sent successfully',
-                        id: 'single with media'
-                    })
-                })
+        // if (type == 'single') {
+        //     const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
+        //     console.log(chatId, 1)
+        // //     if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+        // //     } else {
+        // //         client.sendMessage(chatId, message).then(() => {
+        // //             console.log('message sent', 'single')
+        // //             socket.emit('messagesent', {
+        // //                 status: 200,
+        // //                 message: 'Message sent successfully',
+        // //                 id: 'single'
+        // //             })
+        // //         })
+        // //     }
+        // // } else {
+        phone_number.forEach(number => {
+            number = number.trim().replaceAll(" ", "") + "@c.us";
+            if (number.substring(0, 1) == '+') {
+                // If the number is frmated : +234xxxxxxxxxxxx
+                const chatId = number.substring(1)
+                sendMessage(chatId, message, whatsappAttachment, client)
             } else {
-                client.sendMessage(chatId, message).then(() => {
-                    console.log('message sent', 'single')
-                    socket.emit('messagesent', {
-                        status: 200,
-                        message: 'Message sent successfully',
-                        id: 'single'
-                    })
-                })
+                // If the number is formatted: 234xxxxxxxxxxxx
+                const chatId = number
+                sendMessage(chatId, message, whatsappAttachment, client)
+                //         client.sendMessage(chatId, message).then(() => {
+                //     console.log('message sent', 'multiple()')
+                // })
             }
-        } else {
-            phone_number.forEach(number => {
-                number = number.trim().replaceAll(" ", "") + "@c.us";
-                if (number.substring(0, 1) == '+') {
-                    const chatId = number.substring(1)
-                    if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-                        const media = new MessageMedia.fromUrl("https://thenewcom.com/wp-content/uploads/2019/08/event-sunday-worship.jpg");
-                        client.sendMessage(chatId, media, {
-                            caption: message
-                        }).then(() => {
-                            console.log('message sent with media', 'multiple(+)')
-                        })
-                    } else {
-                        client.sendMessage(chatId, message).then(() => {
-                            console.log('message sent', 'multiple(+)')
-                        })
-                    }
-                } else {
-                    const chatId = number
-                    client.sendMessage(chatId, message).then(() => {
-                        console.log('message sent', 'multiple()')
-                    })
-                }
-            })
-            socket.emit('messagesent', {
-                status: 200,
-                message: 'Message sent successfully',
-                id: 'multiple'
-            })
-        }
+        })
+        socket.emit('messagesent', {
+            status: 200,
+            message: 'Message sent successfully',
+        })
+        // }
 
 
     })
+
+
+
 
 
     socket.on('sendtogroups', ({
@@ -240,28 +222,29 @@ io.on('connection', (socket) => {
         const client = allSessionObject[id];
         console.log(groups)
         console.log(whatsappAttachment)
-        if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+        // if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
             groups.forEach(group => {
                 const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
-                client.sendMessage(groupId, media, {
-                    caption: message
-                }).then(() => {
-                    console.log('message sent with media', 'multiple(+)')
-                })
+                // const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+                sendMessage(groupId, message, whatsappAttachment, client)
+                // client.sendMessage(groupId, media, {
+                //     caption: message
+                // }).then(() => {
+                //     console.log('message sent with media', 'multiple(+)')
+                // })
             })
-        } else {
-            groups.forEach(group => {
-                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                client.sendMessage(groupId, message).then(() => {
-                    console.log('message sent to group')
-                    socket.emit('groupmessagesent', {
-                        status: 200,
-                        message: 'Group message sent successfully'
-                    })
-                })
-            })
-        }
+        // } else {
+        //     groups.forEach(group => {
+        //         const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+        //         client.sendMessage(groupId, message).then(() => {
+        //             console.log('message sent to group')
+        //             socket.emit('groupmessagesent', {
+        //                 status: 200,
+        //                 message: 'Group message sent successfully'
+        //             })
+        //         })
+        //     })
+        // }
     })
 
     // socket.on('deleteremotesession' , async({ session }) => {
@@ -282,21 +265,25 @@ io.on('connection', (socket) => {
 
 // ============================================================================================
 
-// cnvert t base64
+// Send whatsapp message
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(file.path, (error, data) => {
-            if (error) {
-                reject(error);
-            } else {
-                const base64 = data.toString('base64');
-                resolve(base64);
-            }
-        });
-    });
+function sendMessage(chatId, message, whatsappAttachment, client) {
+    if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+        // If a file is attached
+        const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+        client.sendMessage(chatId, media, {
+            caption: message
+        }).then(() => {
+            console.log('message sent with media')
+        })
+
+    } else {
+        // If no file is attached
+        client.sendMessage(chatId, message).then(() => {
+            console.log('message sent')
+        })
+    }
 }
-
 // ============================================================================================
 //   CUSTOM FUNCTIONS AND WHATSAPP API METHODS CALL
 // --------------------------------------------------------------------------------------------

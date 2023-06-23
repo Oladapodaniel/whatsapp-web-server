@@ -145,7 +145,7 @@ io.on('connection', (socket) => {
 
     socket.on('chunk', (data) => {
         mediaBase64 += data
-        console.log('===================================== \n' + data + '\n==================================================')
+        console.log('q')
     })
 
     socket.on('getsession', (data) => {

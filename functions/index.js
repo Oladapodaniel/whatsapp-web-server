@@ -103,8 +103,22 @@ const getWhatsappSession = (id, socket) => {
             message: 'Client got log out, but here is the qr'
         })
     })
+    
+    client.on('change_state', (state) => {
+        console.log(state, 'client current state')
+    })
 
-    client.on('authenticated', () => {
+    client.on('auth_failure', (message) => {
+        console.log(message, 'client auth failed')
+    })
+    
+    client.on('disconnected', () => {
+        console.log('client disconnected')
+    })
+
+    client.on('authenticated', async (sesion) => {
+        const sessionData = await client.getSession();
+        saveSession(clientId, sessionData);
         console.log('Client is Authenticated')
     })
 

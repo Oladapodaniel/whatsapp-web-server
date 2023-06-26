@@ -116,9 +116,7 @@ const getWhatsappSession = (id, socket) => {
         console.log('client disconnected')
     })
 
-    client.on('authenticated', async (sesion) => {
-        const sessionData = await client.getSession();
-        saveSession(clientId, sessionData);
+    client.on('authenticated', async () => {
         console.log('Client is Authenticated')
     })
 

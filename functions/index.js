@@ -54,7 +54,8 @@ const io = new Server(server, {
         methods: ['GET', 'POST'],
     },
 });
-io.set('transports', ['websocket']);
+
+
 server.listen(port, () => {
     console.log('running at', port)
 });

@@ -103,7 +103,7 @@ const getWhatsappSession = (id, socket) => {
             message: 'Client got log out, but here is the qr'
         })
     })
-    
+
     client.on('change_state', (state) => {
         console.log(state, 'client current state')
     })
@@ -111,7 +111,7 @@ const getWhatsappSession = (id, socket) => {
     client.on('auth_failure', (message) => {
         console.log(message, 'client auth failed')
     })
-    
+
     client.on('disconnected', () => {
         console.log('client disconnected')
     })
@@ -235,16 +235,16 @@ io.on('connection', (socket) => {
         console.log(groups)
         console.log(whatsappAttachment)
         // if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-            groups.forEach(group => {
-                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                // const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
-                sendMessage(groupId, message, whatsappAttachment, client)
-                // client.sendMessage(groupId, media, {
-                //     caption: message
-                // }).then(() => {
-                //     console.log('message sent with media', 'multiple(+)')
-                // })
-            })
+        groups.forEach(group => {
+            const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+            // const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+            sendMessage(groupId, message, whatsappAttachment, client)
+            // client.sendMessage(groupId, media, {
+            //     caption: message
+            // }).then(() => {
+            //     console.log('message sent with media', 'multiple(+)')
+            // })
+        })
         // } else {
         //     groups.forEach(group => {
         //         const groupId = group.trim().replaceAll(" ", "") + "@g.us";
@@ -280,26 +280,26 @@ io.on('connection', (socket) => {
 // Send whatsapp message
 
 function sendMessage(chatId, message, whatsappAttachment, client) {
-    if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-    //  If client is defined
     if (client) {
-           // If a file is attached
-           const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
-           client.sendMessage(chatId, media, {
-               caption: message
-           }).then(() => {
-               console.log('message sent with media')
-           })
-   
-       } else {
-           // If no file is attached
-           client.sendMessage(chatId, message).then(() => {
-               console.log('message sent')
-           })
-       }
-    }   else {
+        if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+            // If a file is attached
+            const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+            client.sendMessage(chatId, media, {
+                caption: message
+            }).then(() => {
+                console.log('message sent with media')
+            })
+
+        } else {
+            // If no file is attached
+            client.sendMessage(chatId, message).then(() => {
+                console.log('message sent')
+            })
+        }
+    } else {
         console.log('client is n0t defined');
     }
+
 }
 // ============================================================================================
 //   CUSTOM FUNCTIONS AND WHATSAPP API METHODS CALL

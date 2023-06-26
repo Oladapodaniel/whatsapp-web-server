@@ -269,19 +269,24 @@ io.on('connection', (socket) => {
 
 function sendMessage(chatId, message, whatsappAttachment, client) {
     if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-        // If a file is attached
-        const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
-        client.sendMessage(chatId, media, {
-            caption: message
-        }).then(() => {
-            console.log('message sent with media')
-        })
-
-    } else {
-        // If no file is attached
-        client.sendMessage(chatId, message).then(() => {
-            console.log('message sent')
-        })
+    //  If client is defined
+    if (client) {
+           // If a file is attached
+           const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+           client.sendMessage(chatId, media, {
+               caption: message
+           }).then(() => {
+               console.log('message sent with media')
+           })
+   
+       } else {
+           // If no file is attached
+           client.sendMessage(chatId, message).then(() => {
+               console.log('message sent')
+           })
+       }
+    }   else {
+        console.log('client is n0t defined');
     }
 }
 // ============================================================================================

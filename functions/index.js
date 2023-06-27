@@ -115,6 +115,10 @@ const getWhatsappSession = (id, socket) => {
 
     client.on('disconnected', () => {
         console.log('client disconnected')
+        socket.emit('reconnectclient', {
+            id,
+            message: 'Client got disconnected, attempting to reconnect ...' 
+        })
     })
 
     client.on('authenticated', async () => {

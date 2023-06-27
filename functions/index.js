@@ -166,6 +166,7 @@ io.on('connection', (socket) => {
         // Calculate progress in percentage
         let chunkProgress = Math.round((uploadedChunks / totalChunks) * 100);
         console.log(`Progress: ${chunkProgress}%`);
+        socket.emit('chunkprogress', chunkProgress)
     })
 
     socket.on('getsession', (data) => {

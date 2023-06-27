@@ -160,9 +160,12 @@ io.on('connection', (socket) => {
         socket.emit('Hello', 'Hello form server')
     })
 
-    socket.on('chunk', (data) => {
-        mediaBase64 += data
-        console.log('q')
+    socket.on('chunk', ({ chunk, uploadedChunks, totalChunks }) => {
+        mediaBase64 += chunk
+
+        // Calculate progress in percentage
+        let chunkProgress = Math.round((uploadedChunks / totalChunks) * 100);
+        console.log(`Progress: ${chunkProgress}%`);
     })
 
     socket.on('getsession', (data) => {
@@ -263,6 +266,8 @@ io.on('connection', (socket) => {
         //     })
         // }
     })
+
+    
 
     // socket.on('deleteremotesession' , async({ session }) => {
     //     console.log(store, session);

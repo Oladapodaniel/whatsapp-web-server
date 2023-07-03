@@ -164,7 +164,7 @@ io.on('connection', (socket) => {
         mediaBase64 += chunk
 
         // Calculate progress in percentage
-        let chunkProgress = Math.round((uploadedChunks / totalChunks) * 100);
+        let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
         console.log(`Progress: ${chunkProgress}%`);
         socket.emit('chunkprogress', chunkProgress)
     })
@@ -299,12 +299,16 @@ function sendMessage(chatId, message, whatsappAttachment, client) {
                 caption: message
             }).then(() => {
                 console.log('message sent with media')
+            }).catch(err => {
+                console.log(err, 'err');
             })
 
         } else {
             // If no file is attached
             client.sendMessage(chatId, message).then(() => {
                 console.log('message sent')
+            }).catch(err => {
+                console.log(err, 'err');
             })
         }
     } else {

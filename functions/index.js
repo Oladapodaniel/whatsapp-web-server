@@ -169,6 +169,10 @@ io.on('connection', (socket) => {
         socket.emit('chunkprogress', chunkProgress)
     })
 
+    socket.on('clearfile', (data) => {
+        mediaBase64 = data
+    })
+
     socket.on('getsession', (data) => {
         console.log('GET_SESSION_ID', data)
         const {

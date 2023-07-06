@@ -194,22 +194,6 @@ io.on('connection', (socket) => {
         console.log(id, 'ID')
         console.log(phone_number, 'PHONENUMBER')
         console.log(whatsappAttachment, 'WhatsappAttachment')
-
-        // if (type == 'single') {
-        //     const chatId = phone_number.trim().replaceAll(" ", "").substring(1) + "@c.us";
-        //     console.log(chatId, 1)
-        // //     if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
-        // //     } else {
-        // //         client.sendMessage(chatId, message).then(() => {
-        // //             console.log('message sent', 'single')
-        // //             socket.emit('messagesent', {
-        // //                 status: 200,
-        // //                 message: 'Message sent successfully',
-        // //                 id: 'single'
-        // //             })
-        // //         })
-        // //     }
-        // // } else {
         phone_number.forEach(number => {
             number = number.trim().replaceAll(" ", "") + "@c.us";
             if (number.substring(0, 1) == '+') {
@@ -220,23 +204,13 @@ io.on('connection', (socket) => {
                 // If the number is formatted: 234xxxxxxxxxxxx
                 const chatId = number
                 sendMessage(chatId, message, whatsappAttachment, client)
-                //         client.sendMessage(chatId, message).then(() => {
-                //     console.log('message sent', 'multiple()')
-                // })
             }
         })
         socket.emit('messagesent', {
             status: 200,
             message: 'Message sent successfully',
         })
-        // }
-
-
     })
-
-
-
-
 
     socket.on('sendtogroups', ({
         id,
@@ -247,29 +221,14 @@ io.on('connection', (socket) => {
         const client = allSessionObject[id];
         console.log(groups)
         console.log(whatsappAttachment)
-        // if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
         groups.forEach(group => {
             const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-            // const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
             sendMessage(groupId, message, whatsappAttachment, client)
-            // client.sendMessage(groupId, media, {
-            //     caption: message
-            // }).then(() => {
-            //     console.log('message sent with media', 'multiple(+)')
-            // })
         })
-        // } else {
-        //     groups.forEach(group => {
-        //         const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-        //         client.sendMessage(groupId, message).then(() => {
-        //             console.log('message sent to group')
-        //             socket.emit('groupmessagesent', {
-        //                 status: 200,
-        //                 message: 'Group message sent successfully'
-        //             })
-        //         })
-        //     })
-        // }
+    })
+
+    socket.on('sendscheduledwhatsappmessage', ({ message, whatsappAttachment, sessionId, chatRecipients, groupRecipients, base64File, date }) => {
+        console.log(message, whatsappAttachment, sessionId, chatRecipients, groupRecipients, base64File, date, 'here they are');
     })
 
     

@@ -227,8 +227,8 @@ io.on('connection', (socket) => {
         })
     })
 
-    socket.on('sendscheduledwhatsappmessage', ({ message, whatsappAttachment, sessionId, chatRecipients, groupRecipients, base64File, date }) => {
-        console.log(message, whatsappAttachment, sessionId, chatRecipients, groupRecipients, base64File, date, 'here they are');
+    socket.on('sendscheduledwhatsappmessage', (data) => {
+        console.log(data, 'here it is');
     })
 
     

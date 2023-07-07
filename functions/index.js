@@ -71,7 +71,9 @@ mongoose.connect(MONGODB_URI).then(() => {
     store = new MongoStore({
         mongoose: mongoose
     });
-});
+}).catch(err => {
+    console.log(err, 'error connecting to store');
+})
 
 
 // INITIALIZE VARAIBLES
@@ -88,7 +90,7 @@ const getWhatsappSession = (id, socket) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -152,6 +154,7 @@ const getWhatsappSession = (id, socket) => {
 
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
+    socket.emit('sayhi', 'Hi, message from server')
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });

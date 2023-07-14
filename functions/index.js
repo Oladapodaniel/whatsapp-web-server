@@ -154,7 +154,7 @@ const getWhatsappSession = (id, socket) => {
 
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
-    socket.emit('sayhi', 'Hi, message from server')
+    socket.emit('message', 'This is a test message from the server')
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });

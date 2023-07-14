@@ -233,6 +233,14 @@ io.on('connection', (socket) => {
     socket.on('sendscheduledwhatsappmessage', (data) => {
         console.log(data, 'here it is');
     })
+    
+    socket.on('hi', (data) => {
+        console.log(data, 'hiii');
+    })
+
+    socket.on('register', (data) => {
+        console.log(data, 'register');
+    })
 
     
 

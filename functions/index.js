@@ -63,7 +63,7 @@ server.listen(port, () => {
 
 // SAVING SESSION TO REMOTE MONGODB STORE COLLECTION
 
-const MONGODB_URI = "mongodb+srv://oladapodaniel10:EdL7yYUcuLDAF0qB@cluster0.pmppn5h.mongodb.net/?retryWrites=true&w=majority&authSource=admin"
+const MONGODB_URI = "mongodb+srv://oladapodaniel10:EdL7yYUcuLDAF0qB@cluster0.pmppn5h.mongodb.net/test?retryWrites=true&w=majority&authSource=admin"
 
 let store;
 mongoose.connect(MONGODB_URI).then(() => {
@@ -79,7 +79,8 @@ mongoose.connect(MONGODB_URI).then(() => {
 // INITIALIZE VARAIBLES
 
 let allSessionObject = {};
-let mediaBase64 = ""
+let mediaBase64 = {};
+let qrCounter = 0;
 
 
 
@@ -99,12 +100,25 @@ const getWhatsappSession = (id, socket) => {
         })
     })
 
+    
+    
     client.on('qr', (qr) => {
         console.log('retrieved qr code', qr)
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'
         })
+        qrCounter++
+        if (qrCounter > 10) {
+            client.destroy();
+            socket.emit('clientdestroyed')
+            console.log('client destryed');
+            qrCounter = 0
+        }
+    })
+
+    client.on('message', (message) => {
+        console.log(message, 'new message')
     })
 
     client.on('change_state', (state) => {
@@ -163,8 +177,8 @@ io.on('connection', (socket) => {
         socket.emit('Hello', 'Hello form server')
     })
 
-    socket.on('chunk', ({ chunk, uploadedChunks, totalChunks }) => {
-        mediaBase64 += chunk
+    socket.on('chunk', ({ chunk, uploadedChunks, totalChunks, id }) => {
+        mediaBase64[id] += chunk
 
         // Calculate progress in percentage
         let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
@@ -172,8 +186,8 @@ io.on('connection', (socket) => {
         socket.emit('chunkprogress', chunkProgress)
     })
 
-    socket.on('clearfile', (data) => {
-        mediaBase64 = data
+    socket.on('clearfile', ({ data, id }) => {
+        mediaBase64[id] = data
     })
 
     socket.on('getsession', (data) => {
@@ -202,11 +216,11 @@ io.on('connection', (socket) => {
             if (number.substring(0, 1) == '+') {
                 // If the number is frmated : +234xxxxxxxxxxxx
                 const chatId = number.substring(1)
-                sendMessage(chatId, message, whatsappAttachment, client)
+                sendMessage(chatId, message, whatsappAttachment, client, id, socket)
             } else {
                 // If the number is formatted: 234xxxxxxxxxxxx
                 const chatId = number
-                sendMessage(chatId, message, whatsappAttachment, client)
+                sendMessage(chatId, message, whatsappAttachment, client, id, socket)
             }
         })
         socket.emit('messagesent', {
@@ -226,23 +240,41 @@ io.on('connection', (socket) => {
         console.log(whatsappAttachment)
         groups.forEach(group => {
             const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-            sendMessage(groupId, message, whatsappAttachment, client)
+            sendMessage(groupId, message, whatsappAttachment, client, id, socket)
         })
     })
 
-    socket.on('sendscheduledwhatsappmessage', (data) => {
-        console.log(data, 'here it is');
-    })
-    
-    socket.on('hi', (data) => {
-        console.log(data, 'hiii');
-    })
+    socket.on('sendscheduledwhatsappmessage', ({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }) => {
+        console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
+          if (Base64File) {
+            mediaBase64[SessionId] = Base64File
+        }
+        const client = allSessionObject[SessionId];
 
-    socket.on('register', (data) => {
-        console.log(data, 'register');
-    })
+        // If sending to phone numbers
+        if (ChatRecipients && ChatRecipients.length > 0) {
+            ChatRecipients.forEach(number => {
+                number = number.trim().replaceAll(" ", "") + "@c.us";
+                if (number.substring(0, 1) == '+') {
+                    // If the number is frmated : +234xxxxxxxxxxxx
+                    const chatId = number.substring(1)
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                } else {
+                    // If the number is formatted: 234xxxxxxxxxxxx
+                    const chatId = number
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                }
+            })
+        }
 
-    
+        // If sending to groups
+        if (GroupRecipients && GroupRecipients.length > 0) {
+            GroupRecipients.forEach(group => {
+                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
+            })
+        }
+    })
 
     // socket.on('deleteremotesession' , async({ session }) => {
     //     console.log(store, session);
@@ -264,11 +296,11 @@ io.on('connection', (socket) => {
 
 // Send whatsapp message
 
-function sendMessage(chatId, message, whatsappAttachment, client) {
+function sendMessage(chatId, message, whatsappAttachment, client, id, socket) {
     if (client) {
         if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
             // If a file is attached
-            const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64);
+            const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64[id]);
             client.sendMessage(chatId, media, {
                 caption: message
             }).then(() => {
@@ -286,7 +318,11 @@ function sendMessage(chatId, message, whatsappAttachment, client) {
             })
         }
     } else {
-        console.log('client is n0t defined');
+        console.log('client is not defined');
+        socket.emit('reconnectclient', {
+            id,
+            message: 'Client got disconnected, attempting to reconnect ...' 
+        })
     }
 
 }

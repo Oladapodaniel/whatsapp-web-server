@@ -224,37 +224,37 @@ io.on('connection', (socket) => {
         })
     })
 
-    socket.on('sendscheduledwhatsappmessage', (data) => {
-        // console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
-        console.log(data, 'Here is backend data');
-        //   if (Base64File) {
-        //     mediaBase64[SessionId] = Base64File
-        // }
-        // const client = allSessionObject[SessionId];
+    socket.on('sendscheduledwhatsappmessage', ({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }) => {
+        console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
+        socket.emit('schedulepayload', { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File })
+          if (Base64File) {
+            mediaBase64[SessionId] = Base64File
+        }
+        const client = allSessionObject[SessionId];
 
-        // // If sending to phone numbers
-        // if (ChatRecipients && ChatRecipients.length > 0) {
-        //     ChatRecipients.forEach(number => {
-        //         number = number.trim().replaceAll(" ", "") + "@c.us";
-        //         if (number.substring(0, 1) == '+') {
-        //             // If the number is frmated : +234xxxxxxxxxxxx
-        //             const chatId = number.substring(1)
-        //             sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-        //         } else {
-        //             // If the number is formatted: 234xxxxxxxxxxxx
-        //             const chatId = number
-        //             sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-        //         }
-        //     })
-        // }
+        // If sending to phone numbers
+        if (ChatRecipients && ChatRecipients.length > 0) {
+            ChatRecipients.forEach(number => {
+                number = number.trim().replaceAll(" ", "") + "@c.us";
+                if (number.substring(0, 1) == '+') {
+                    // If the number is frmated : +234xxxxxxxxxxxx
+                    const chatId = number.substring(1)
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                } else {
+                    // If the number is formatted: 234xxxxxxxxxxxx
+                    const chatId = number
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                }
+            })
+        }
 
-        // // If sending to groups
-        // if (GroupRecipients && GroupRecipients.length > 0) {
-        //     GroupRecipients.forEach(group => {
-        //         const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-        //         sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
-        //     })
-        // }
+        // If sending to groups
+        if (GroupRecipients && GroupRecipients.length > 0) {
+            GroupRecipients.forEach(group => {
+                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
+            })
+        }
     })
 
     // socket.on('deleteremotesession' , async({ session }) => {

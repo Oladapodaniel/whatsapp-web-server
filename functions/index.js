@@ -279,7 +279,7 @@ io.on('connection', (socket) => {
 
 function sendMessage(chatId, message, whatsappAttachment, client, id, socket) {
     if (client) {
-        if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0) {
+        if ((whatsappAttachment && Object.keys(whatsappAttachment).length > 0) || (whatsappAttachment && whatsappAttachment.Mimetype)) {
             // If a file is attached
             const media = new MessageMedia(whatsappAttachment.mimeType, mediaBase64[id]);
             client.sendMessage(chatId, media, {

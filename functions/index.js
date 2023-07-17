@@ -19,10 +19,6 @@ const {
 } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const puppeteer = require('puppeteer');
-const fs = require('fs');
-// const router = express.Router();
-// const serverless = require('serverless-http');
-
 
 
 app.get('/', (req, res) => {
@@ -31,22 +27,6 @@ app.get('/', (req, res) => {
 
 const executablePath = puppeteer.executablePath();
 console.log('======', executablePath, '======')
-
-
-// router.get('/', (req, res) => {
-//     res.send('Node app is running')
-// })
-// router.get('/add', (req, res) => {
-//     res.send('New record added')
-// })
-// router.get('/demo', (req, res) => {
-//     res.json([
-//         { name: "Dapo", height: 23}
-//     ])
-// })
-// app.use('/.netlify/functions/api', router);
-// module.exports.handler = serverless(app)
-
 
 const io = new Server(server, {
     cors: {
@@ -112,13 +92,13 @@ const getWhatsappSession = (id, socket) => {
         if (qrCounter > 10) {
             client.destroy();
             socket.emit('clientdestroyed')
-            console.log('client destryed');
+            console.log('client destroyed');
             qrCounter = 0
         }
     })
 
     client.on('message', (message) => {
-        console.log(message, 'new message')
+        socket.emit('newmessage', message)
     })
 
     client.on('change_state', (state) => {
@@ -172,7 +152,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
-    socket.on('connected', (data) => {
+    socket.on('connected', () => {
         console.log('connected to the server')
         socket.emit('Hello', 'Hello form server')
     })
@@ -244,36 +224,37 @@ io.on('connection', (socket) => {
         })
     })
 
-    socket.on('sendscheduledwhatsappmessage', ({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }) => {
-        console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
-          if (Base64File) {
-            mediaBase64[SessionId] = Base64File
-        }
-        const client = allSessionObject[SessionId];
+    socket.on('sendscheduledwhatsappmessage', (data) => {
+        // console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
+        console.log(data, 'Here is backend data');
+        //   if (Base64File) {
+        //     mediaBase64[SessionId] = Base64File
+        // }
+        // const client = allSessionObject[SessionId];
 
-        // If sending to phone numbers
-        if (ChatRecipients && ChatRecipients.length > 0) {
-            ChatRecipients.forEach(number => {
-                number = number.trim().replaceAll(" ", "") + "@c.us";
-                if (number.substring(0, 1) == '+') {
-                    // If the number is frmated : +234xxxxxxxxxxxx
-                    const chatId = number.substring(1)
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                } else {
-                    // If the number is formatted: 234xxxxxxxxxxxx
-                    const chatId = number
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                }
-            })
-        }
+        // // If sending to phone numbers
+        // if (ChatRecipients && ChatRecipients.length > 0) {
+        //     ChatRecipients.forEach(number => {
+        //         number = number.trim().replaceAll(" ", "") + "@c.us";
+        //         if (number.substring(0, 1) == '+') {
+        //             // If the number is frmated : +234xxxxxxxxxxxx
+        //             const chatId = number.substring(1)
+        //             sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+        //         } else {
+        //             // If the number is formatted: 234xxxxxxxxxxxx
+        //             const chatId = number
+        //             sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+        //         }
+        //     })
+        // }
 
-        // If sending to groups
-        if (GroupRecipients && GroupRecipients.length > 0) {
-            GroupRecipients.forEach(group => {
-                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
-            })
-        }
+        // // If sending to groups
+        // if (GroupRecipients && GroupRecipients.length > 0) {
+        //     GroupRecipients.forEach(group => {
+        //         const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+        //         sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
+        //     })
+        // }
     })
 
     // socket.on('deleteremotesession' , async({ session }) => {
@@ -348,6 +329,11 @@ const getAllChats = async (client, socket, id) => {
 // GET CHAT BY ID
 
 const getChatById = async (client) => {
+
+//     const phoneNumbers = ['09033246067', '08035705192'];
+//     try {
+//   console.log(1)
+//   const chats = await Promise.all(phoneNumbers.map(number => client.getChatById(`${number}@c.us`)));
     const chatId = '2348035705192@c.us'
     // const chat = await client.pupPage.evaluate(async (client) => {
     const chat = await client.getChatById(chatId);
@@ -360,155 +346,3 @@ const getChatById = async (client) => {
     //     message: 'Here are all chats'
     // })
 }
-
-
-// ============================================================================================
-
-
-
-
-// const express = require('express');
-// const { Client, LocalAuth } = require('whatsapp-web.js');
-// const app = express();
-// const port = 3001;
-
-// const http = require('http');
-// const server = http.createServer(app);
-// const io = require('socket.io')(server, {
-//     cors: {
-//         origin: 'http://localhost:8080',
-//         methods: ['GET', 'POST'],
-//     },
-// });
-
-// app.get('/', (req, res) => {
-//     res.send('<h1>Hello World</h1>');
-// });
-
-// server.listen(port, () => {
-//     console.log('Server is running on the port', port);
-// });
-
-// let allSessionObject = {};
-// const createWhatsappSession = (id, socket) => {
-//     const client = new Client({
-//         puppeteer: {
-//             headless: false,
-//             args: ['--no-sandbox']
-//         },
-//           auth: new LocalAuth({
-//             secret: 'YOUR_SECRET',
-//             clientId: id
-//           }),
-//         // authStrategy: new LocalAuth({
-//         //     clientId: 'YOUR_CLIENT_ID'
-//         // })
-//     });
-
-//     client.on('qr', (qr) => {
-//         //   console.log('QR RECEIVED', qr);
-//         console.log('reaching here')
-//           socket.emit('qr', {
-//             qr
-//           })
-//     });
-
-//     client.on('authenticated', () => {
-//         console.log('Client is Authenticated')
-//     })
-
-//     client.on('ready', () => {
-//         console.log('Client is really ready!');
-//         allSessionObject[id] = client
-//         socket.emit('ready', {
-//             id,
-//             message: 'Client is ready!!!'
-//         })
-
-//         getAllChats(client)
-//         // client.on('message', () => {
-//         //     console.log('sending message')
-//         //     const number = "+2348037716063"
-//         //     const chatId = number.substring(1) + "@c.us";
-//         //     // if(message.body === '!ping') {
-//         //         client.sendMessage(chatId, 'Here is the message for Mr Peter');
-//         //     // }   else {
-//         //     //     client.sendMessage(message.from, 'ping');
-//         //     // }
-//         // });
-
-//     });
-
-
-
-//     client.on('error', (err) => {
-//         console.log(err);
-//     });
-//     client.initialize();
-
-// }
-
-// const getAllChats = async (client) => {
-//     console.log('reaching')
-//     const chats = await client.pupPage.evaluate(async () => {
-//         const chats = await window.WWebJS.getChats();
-//         return JSON.stringify(chats)
-//     })
-//     // const allChats = await client.getChats();
-//     console.log(chats)
-// }
-
-
-// io.on('connection', (socket) => {
-//     console.log('a user connected', socket.id);
-//     socket.on('disconnect', () => {
-//         console.log('user disconnected');
-//     });
-//     socket.on('connected', (data) => {
-
-//         socket.emit('hello', 'Hello form server');
-//     });
-//     socket.on('createsession', (data) => {
-//         console.log('SESSION_ID', data)
-//         const { id } = data
-//         createWhatsappSession(id, socket)
-//     })
-//     socket.on('getAllChats', async(data) => {
-
-//         const client = allSessionObject[data];
-//         console.log(allSessionObject[data])
-//         console.log(client, 'clients here')
-//         // const allChats = await client.getChats();
-//         // socket.emit('allchats', allChats)
-//     //     const chats =await client.pupPage.evaluate(async () => {
-//     //         const chats = await window.WWebJS.getChats();
-//     //         return JSON.stringify(chats)
-//     //     })
-//     //     console.log(chats)
-//     //     console.log(JSON.parse(chats).map((chat) => ChatFactory.create(client, chat)));
-
-
-//     // const chatIds = await client.pupPage.evaluate(() => {
-//     //     return window.WWebJS.getChats().map(c => c.id._serialized);
-//     // });
-//     })
-// });
-
-
-//     const phoneNumbers = ['09033246067', '08035705192'];
-//     try {
-//   console.log(1)
-//   const chats = await Promise.all(phoneNumbers.map(number => client.getChatById(`${number}@c.us`)));
-//   console.log(2)
-//   const message = 'Hello, World!'; // replace with your message
-//   console.log(3)
-
-//   chats.forEach(chat => {
-//       chat.sendMessage(message).then(() => {
-//           console.log(`Message sent to ${chat.name}`);
-//         });
-//         console.log(4)
-//   });
-// }catch(err) {
-//     console.log(err, 'Error')
-// }

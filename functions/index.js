@@ -135,7 +135,7 @@ const getWhatsappSession = (id, socket, reconnect) => {
             console.log('ready and recnnectd');
             let { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File } = scheduleMessagePayload[id]
             console.log(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, 'destructured')
-            sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File)
+            sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, socket)
         }
     });
 
@@ -237,7 +237,7 @@ io.on('connection', (socket) => {
         console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
         scheduleMessagePayload[SessionId] = { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }
         // socket.emit('schedulepayload', { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File })
-        sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File)
+        sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, socket)
     })
 
     // socket.on('deleteremotesession' , async({ session }) => {
@@ -334,7 +334,7 @@ const getChatById = async (client) => {
     // ------------------------------------------------------------------------------------------
     // send schedule message
 
-    function sendScheduledMessage (Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File) {
+    function sendScheduledMessage (Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, socket) {
         if (Base64File) {
             mediaBase64[SessionId] = Base64File
         }

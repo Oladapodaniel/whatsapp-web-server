@@ -264,7 +264,7 @@ function sendMessage(chatId, message, whatsappAttachment, client, id, socket) {
     if (client) {
         if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0 && (whatsappAttachment.MimeType || whatsappAttachment.mimeType)) {
             // If a file is attached
-            const media = new MessageMedia((whatsappAttachment.MimeType || whatsappAttachment.mimeType), mediaBase64[id]);
+            const media = new MessageMedia((whatsappAttachment.MimeType || whatsappAttachment.mimeType), mediaBase64[id], (whatsappAttachment.FileName || whatsappAttachment.fileName));
             client.sendMessage(chatId, media, {
                 caption: message
             }).then(() => {

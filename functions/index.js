@@ -61,12 +61,13 @@ mongoose.connect(MONGODB_URI).then(() => {
 let allSessionObject = {};
 let mediaBase64 = {};
 let qrCounter = 0;
+let scheduleMessagePayload = {}
 
 
 
 
 // RETRIEVE AUTHENTICATED SESSION
-const getWhatsappSession = (id, socket) => {
+const getWhatsappSession = (id, socket, reconnect) => {
     const client = new Client({
         puppeteer: {
             headless: true,
@@ -80,8 +81,8 @@ const getWhatsappSession = (id, socket) => {
         })
     })
 
-    
-    
+
+
     client.on('qr', (qr) => {
         console.log('retrieved qr code', qr)
         socket.emit("qr", {
@@ -113,7 +114,7 @@ const getWhatsappSession = (id, socket) => {
         console.log('client disconnected')
         socket.emit('reconnectclient', {
             id,
-            message: 'Client got disconnected, attempting to reconnect ...' 
+            message: 'Client got disconnected, attempting to reconnect ...'
         })
     })
 
@@ -129,6 +130,13 @@ const getWhatsappSession = (id, socket) => {
             message: "client is ready"
         })
         getAllChats(client, socket, id);
+
+        if (reconnect == 'reconnect') {
+            console.log('ready and recnnectd');
+            let { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File } = scheduleMessagePayload[id]
+            console.log(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, 'destructured')
+            sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File)
+        }
     });
 
 
@@ -157,13 +165,14 @@ io.on('connection', (socket) => {
         socket.emit('Hello', 'Hello form server')
     })
 
-    socket.on('chunk', ({ chunk, uploadedChunks, totalChunks, id }) => {
-        mediaBase64[id] += chunk
+    socket.on('chunk', ({ base64String, id }) => {
+        mediaBase64[id] = base64String
+        console.log(mediaBase64[id])
 
-        // Calculate progress in percentage
-        let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
-        console.log(`Progress: ${chunkProgress}%`);
-        socket.emit('chunkprogress', chunkProgress)
+        // // Calculate progress in percentage
+        // let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
+        // console.log(`Progress: ${chunkProgress}%`);
+        // socket.emit('chunkprogress', chunkProgress)
     })
 
     socket.on('clearfile', ({ data, id }) => {
@@ -175,7 +184,7 @@ io.on('connection', (socket) => {
         const {
             id
         } = data
-        getWhatsappSession(id, socket)
+        getWhatsappSession(id, socket, '')
     })
 
 
@@ -226,35 +235,9 @@ io.on('connection', (socket) => {
 
     socket.on('sendscheduledwhatsappmessage', ({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }) => {
         console.log({ Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File });
-        socket.emit('schedulepayload', { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File })
-          if (Base64File) {
-            mediaBase64[SessionId] = Base64File
-        }
-        const client = allSessionObject[SessionId];
-
-        // If sending to phone numbers
-        if (ChatRecipients && ChatRecipients.length > 0) {
-            ChatRecipients.forEach(number => {
-                number = number.trim().replaceAll(" ", "") + "@c.us";
-                if (number.substring(0, 1) == '+') {
-                    // If the number is frmated : +234xxxxxxxxxxxx
-                    const chatId = number.substring(1)
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                } else {
-                    // If the number is formatted: 234xxxxxxxxxxxx
-                    const chatId = number
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                }
-            })
-        }
-
-        // If sending to groups
-        if (GroupRecipients && GroupRecipients.length > 0) {
-            GroupRecipients.forEach(group => {
-                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
-            })
-        }
+        scheduleMessagePayload[SessionId] = { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File }
+        // socket.emit('schedulepayload', { Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File })
+        sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File)
     })
 
     // socket.on('deleteremotesession' , async({ session }) => {
@@ -300,10 +283,11 @@ function sendMessage(chatId, message, whatsappAttachment, client, id, socket) {
         }
     } else {
         console.log('client is not defined');
-        socket.emit('reconnectclient', {
-            id,
-            message: 'Client got disconnected, attempting to reconnect ...' 
-        })
+        getWhatsappSession(id, socket, 'reconnect')
+        // socket.emit('reconnectclient', {
+        //     id,
+        //     message: 'Client got disconnected, attempting to reconnect ...' 
+        // })
     }
 
 }
@@ -330,10 +314,10 @@ const getAllChats = async (client, socket, id) => {
 
 const getChatById = async (client) => {
 
-//     const phoneNumbers = ['09033246067', '08035705192'];
-//     try {
-//   console.log(1)
-//   const chats = await Promise.all(phoneNumbers.map(number => client.getChatById(`${number}@c.us`)));
+    //     const phoneNumbers = ['09033246067', '08035705192'];
+    //     try {
+    //   console.log(1)
+    //   const chats = await Promise.all(phoneNumbers.map(number => client.getChatById(`${number}@c.us`)));
     const chatId = '2348035705192@c.us'
     // const chat = await client.pupPage.evaluate(async (client) => {
     const chat = await client.getChatById(chatId);
@@ -346,3 +330,38 @@ const getChatById = async (client) => {
     //     message: 'Here are all chats'
     // })
 }
+
+    // ------------------------------------------------------------------------------------------
+    // send schedule message
+
+    function sendScheduledMessage (Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File) {
+        if (Base64File) {
+            mediaBase64[SessionId] = Base64File
+        }
+        const client = allSessionObject[SessionId];
+
+        // If sending to phone numbers
+        if (ChatRecipients && ChatRecipients.length > 0) {
+            ChatRecipients.forEach(number => {
+                number = number.trim().replaceAll(" ", "") + "@c.us";
+                if (number.substring(0, 1) == '+') {
+                    // If the number is frmated : +234xxxxxxxxxxxx
+                    const chatId = number.substring(1)
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                } else {
+                    // If the number is formatted: 234xxxxxxxxxxxx
+                    const chatId = number
+                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
+                }
+            })
+        }
+
+        // If sending to groups
+        if (GroupRecipients && GroupRecipients.length > 0) {
+            GroupRecipients.forEach(group => {
+                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
+            })
+        }
+    }
+

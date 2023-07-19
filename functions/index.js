@@ -167,6 +167,9 @@ io.on('connection', (socket) => {
 
     socket.on('chunk', ({ base64String, id }) => {
         mediaBase64[id] = base64String
+        if (mediaBase64[id]) {
+            socket.emit('fileready')
+        }
         console.log(mediaBase64[id])
 
         // // Calculate progress in percentage

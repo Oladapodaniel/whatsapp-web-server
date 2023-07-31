@@ -72,7 +72,7 @@ const getWhatsappSession = (id, socket, reconnect) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+            executablePath: executablePath
         },
         authStrategy: new RemoteAuth({
             clientId: id,
@@ -165,17 +165,23 @@ io.on('connection', (socket) => {
         socket.emit('Hello', 'Hello form server')
     })
 
-    socket.on('chunk', ({ base64String, id }) => {
-        mediaBase64[id] = base64String
-        if (mediaBase64[id]) {
-            socket.emit('fileready')
-        }
-        console.log(mediaBase64[id])
+    socket.on('resetmediaobject', ({ data, id }) => {
+        mediaBase64[id] = data
+    })
+
+    socket.on('chunk', ({ chunk, uploadedChunks, totalChunks, id }) => {
+        mediaBase64[id] += chunk
+        // if (mediaBase64[id]) {
+        //     socket.emit('fileready')
+        //     console.log('reaching here')
+        // }
+        console.log(id, 'checking');
+        console.log("===========================");
 
         // // Calculate progress in percentage
-        // let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
-        // console.log(`Progress: ${chunkProgress}%`);
-        // socket.emit('chunkprogress', chunkProgress)
+        let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);
+        console.log(`Progress: ${chunkProgress}%`);
+        socket.emit('chunkprogress', chunkProgress)
     })
 
     socket.on('clearfile', ({ data, id }) => {
@@ -203,16 +209,17 @@ io.on('connection', (socket) => {
         console.log(id, 'ID')
         console.log(phone_number, 'PHONENUMBER')
         console.log(whatsappAttachment, 'WhatsappAttachment')
-        phone_number.forEach(number => {
-            number = number.trim().replaceAll(" ", "") + "@c.us";
+        // getChatById(client, phone_number)
+        phone_number.forEach(item => {
+            let number = item.phoneNumber.trim().replaceAll(" ", "") + "@c.us";
             if (number.substring(0, 1) == '+') {
                 // If the number is frmated : +234xxxxxxxxxxxx
                 const chatId = number.substring(1)
-                sendMessage(chatId, message, whatsappAttachment, client, id, socket)
+                sendMessage(chatId, message, whatsappAttachment, client, id, item.name, socket)
             } else {
                 // If the number is formatted: 234xxxxxxxxxxxx
                 const chatId = number
-                sendMessage(chatId, message, whatsappAttachment, client, id, socket)
+                sendMessage(chatId, message, whatsappAttachment, client, id, item.name, socket)
             }
         })
         socket.emit('messagesent', {
@@ -232,7 +239,7 @@ io.on('connection', (socket) => {
         console.log(whatsappAttachment)
         groups.forEach(group => {
             const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-            sendMessage(groupId, message, whatsappAttachment, client, id, socket)
+            sendMessage(groupId, message, whatsappAttachment, client, id, null, socket)
         })
     })
 
@@ -263,8 +270,11 @@ io.on('connection', (socket) => {
 
 // Send whatsapp message
 
-function sendMessage(chatId, message, whatsappAttachment, client, id, socket) {
+function sendMessage(chatId, message, whatsappAttachment, client, id, name, socket) {
     if (client) {
+        if (message.includes("#name#")) {
+            message = message.replaceAll("#name#", name)
+        }
         if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0 && (whatsappAttachment.MimeType || whatsappAttachment.mimeType)) {
             // If a file is attached
             const media = new MessageMedia((whatsappAttachment.MimeType || whatsappAttachment.mimeType), mediaBase64[id], (whatsappAttachment.FileName || whatsappAttachment.fileName));
@@ -315,56 +325,71 @@ const getAllChats = async (client, socket, id) => {
 // ------------------------------------------------------------------------------------------
 // GET CHAT BY ID
 
-const getChatById = async (client) => {
+const getChatById = async (client, phone_number) => {
+    console.log('getting chats bio data');
+    try {
+        //   console.log(1)
+        // const chats = await Promise.all(phone_number.map(number => client.getChatById(`${number}@c.us`)));
+        // console.log(chats, 'here')
+        for (let i = 0; i < phone_number.length; i++) {
+            let number = phone_number[i];
+            number = number.trim().replaceAll(" ", "") + "@c.us";
+            if (number.substring(0, 1) == '+') {
+                // If the number is formated : +234xxxxxxxxxxxx
+                const chatId = number.substring(1)
+                const chat = await client.getChatById(chatId);
+                console.log(chat, 'plus')
+                // sendMessage(chatId, message, whatsappAttachment, client, id, socket)
+            } else {
+                // If the number is formatted: 234xxxxxxxxxxxx
+                const chatId = number
+                const chat = await client.getChatById(chatId);
+                console.log(chat, 'without plus')
+                // sendMessage(chatId, message, whatsappAttachment, client, id, socket)
+            }
 
-    //     const phoneNumbers = ['09033246067', '08035705192'];
-    //     try {
-    //   console.log(1)
-    //   const chats = await Promise.all(phoneNumbers.map(number => client.getChatById(`${number}@c.us`)));
-    const chatId = '2348035705192@c.us'
-    // const chat = await client.pupPage.evaluate(async (client) => {
-    const chat = await client.getChatById(chatId);
-    // console.log(chat)
-    // })
-    console.log(chat)
-    // socket.emit('allchats', {
-    //     id,
-    //     chats,
-    //     message: 'Here are all chats'
-    // })
+            const chatId = '2348035705192@c.us'
+
+            
+        }
+        // const chat = await client.pupPage.evaluate(async (client) => {
+        // })
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-    // ------------------------------------------------------------------------------------------
-    // send schedule message
+// ------------------------------------------------------------------------------------------
+// send schedule message
 
-    function sendScheduledMessage (Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, socket) {
-        if (Base64File) {
-            mediaBase64[SessionId] = Base64File
-        }
-        const client = allSessionObject[SessionId];
-
-        // If sending to phone numbers
-        if (ChatRecipients && ChatRecipients.length > 0) {
-            ChatRecipients.forEach(number => {
-                number = number.trim().replaceAll(" ", "") + "@c.us";
-                if (number.substring(0, 1) == '+') {
-                    // If the number is frmated : +234xxxxxxxxxxxx
-                    const chatId = number.substring(1)
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                } else {
-                    // If the number is formatted: 234xxxxxxxxxxxx
-                    const chatId = number
-                    sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, socket)
-                }
-            })
-        }
-
-        // If sending to groups
-        if (GroupRecipients && GroupRecipients.length > 0) {
-            GroupRecipients.forEach(group => {
-                const groupId = group.trim().replaceAll(" ", "") + "@g.us";
-                sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
-            })
-        }
+function sendScheduledMessage(Message, WhatsappAttachment, SessionId, ChatRecipients, GroupRecipients, Base64File, socket) {
+    if (Base64File) {
+        mediaBase64[SessionId] = Base64File
     }
+    const client = allSessionObject[SessionId];
+
+    // If sending to phone numbers
+    if (ChatRecipients && ChatRecipients.length > 0) {
+        ChatRecipients.forEach(item => {
+            let number = item.phoneNumber.trim().replaceAll(" ", "") + "@c.us";
+            if (number.substring(0, 1) == '+') {
+                // If the number is frmated : +234xxxxxxxxxxxx
+                const chatId = number.substring(1)
+                sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, item.name, socket)
+            } else {
+                // If the number is formatted: 234xxxxxxxxxxxx
+                const chatId = number
+                sendMessage(chatId, Message, WhatsappAttachment, client, SessionId, item.name, socket)
+            }
+        })
+    }
+
+    // If sending to groups
+    if (GroupRecipients && GroupRecipients.length > 0) {
+        GroupRecipients.forEach(group => {
+            const groupId = group.trim().replaceAll(" ", "") + "@g.us";
+            sendMessage(groupId, Message, WhatsappAttachment, client, SessionId, socket)
+        })
+    }
+}
 

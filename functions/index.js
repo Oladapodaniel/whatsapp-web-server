@@ -18,15 +18,15 @@ const {
     MongoStore
 } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
 
 
 app.get('/', (req, res) => {
     res.send('<h1>Node application</h1>');
 });
 
-const executablePath = puppeteer.executablePath();
-console.log('======', executablePath, '======')
+// const executablePath = puppeteer.executablePath();
+// console.log('======', executablePath, '======')
 
 const io = new Server(server, {
     cors: {
@@ -72,7 +72,7 @@ const getWhatsappSession = (id, socket, reconnect) => {
         puppeteer: {
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            executablePath: executablePath
+            // executablePath: executablePath
         },
         authStrategy: new RemoteAuth({
             clientId: id,

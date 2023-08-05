@@ -15,7 +15,6 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "mongoose": "^7.1.1",
-    "puppeteer": "^20.2.1",
     "socket.io": "^4.6.1",
     "whatsapp-web.js": "^1.21.0",
     "wwebjs-mongo": "^1.1.0"

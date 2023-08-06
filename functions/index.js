@@ -273,7 +273,7 @@ io.on('connection', (socket) => {
 function sendMessage(chatId, message, whatsappAttachment, client, id, name, socket) {
     if (client) {
         if (message.includes("#name#")) {
-            message = message.replaceAll("#name#", name)
+            message = message.replaceAll("#name#", name ? name : "")
         }
         if (whatsappAttachment && Object.keys(whatsappAttachment).length > 0 && (whatsappAttachment.MimeType || whatsappAttachment.mimeType)) {
             // If a file is attached

@@ -176,7 +176,7 @@ io.on('connection', (socket) => {
         //     console.log('reaching here')
         // }
         console.log(id, 'checking');
-        console.log("===========================");
+        console.log("==");
 
         // // Calculate progress in percentage
         let chunkProgress = Math.ceil((uploadedChunks / totalChunks) * 100);

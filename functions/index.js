@@ -84,7 +84,7 @@ const getWhatsappSession = (id, socket, reconnect) => {
 
 
     client.on('qr', (qr) => {
-        console.log('retrieved qr code', qr)
+        console.log('retrieved qr code', qr, id+'here')
         socket.emit("qr", {
             qr,
             message: 'Client got log out, but here is the qr'
@@ -189,7 +189,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('getsession', (data) => {
-        console.log('GET_SESSION_ID', data)
+        console.log('GET_SESSION_ID_1', data)
         const {
             id
         } = data

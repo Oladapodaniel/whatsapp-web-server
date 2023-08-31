@@ -109,6 +109,14 @@ const getWhatsappSession = (id, socket, reconnect) => {
     client.on('auth_failure', (message) => {
         console.log(message, 'client auth failed')
     })
+    
+    client.on('incoming_call', (call) => {
+        console.log(call, 'Here is the call object')
+    })
+    
+    client.on('media_uploaded', (message) => {
+        console.log(message, 'Media uploaded')
+    })
 
     client.on('disconnected', () => {
         console.log('client disconnected')

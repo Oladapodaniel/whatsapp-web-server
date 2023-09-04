@@ -304,7 +304,7 @@ function sendMessage(chatId, message, whatsappAttachment, client, id, name, sock
         }
     } else {
         console.log('client is not defined');
-        // getWhatsappSession(id, socket, 'reconnect')
+        getWhatsappSession(id, socket, 'reconnect')
         // socket.emit('reconnectclient', {
         //     id,
         //     message: 'Client got disconnected, attempting to reconnect ...' 
